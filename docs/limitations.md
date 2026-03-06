@@ -1,69 +1,159 @@
 # Limitations: What Can't Be Ported to Droid
 
-This document describes Claude Code features that have no direct Droid equivalent, along with workarounds.
+This document describes Claude Code features that have no direct Droid equivalent, along with concrete workarounds.
 
 ## No Session Lifecycle Hooks
 
-**Claude Code**: `SessionStart` and `Stop` hooks fire automatically. The `SessionStart` hook injects recent handoff context; the `Stop` hook reminds about session logging.
+**Claude Code**: `SessionStart` and `Stop` hooks fire automatically via `~/.claude/settings.json`. The `SessionStart` hook runs `load-handoff-context.sh` which finds the most recent `handoff-*.md` and injects it as context. The `Stop` hook runs `session-end-reminder.sh` which checks if 3+ files changed and reminds you to log/handoff.
 
-**Droid**: No lifecycle hook system.
+**Droid**: No lifecycle hook system. Nothing runs automatically when you start or end a session.
 
-**Workaround**: The `session-init` droid includes handoff context loading as its first step. The `session-logger` and `handoff` droids include cross-reminders about each other. Users must manually invoke these instead of relying on automatic triggers.
+**Workaround**: Run `/session-init` at the start of every session. It does the same work as the SessionStart hook (finds and loads recent handoff) plus the `/lets-go` command (syncs git, reviews project docs):
+
+```
+you> /session-init
+droid> Found handoff: ~/.factory/logs/handoff-2026-03-05-1430.md
+       Branch main is up to date with origin.
+       ...
+```
+
+For session end, `/session-logger` reminds you about `/handoff` and vice versa:
+
+```
+you> /session-logger
+droid> Session log saved to ~/.factory/logs/2026-03-06-1700-auth.md
+       Reminder: You changed 8 files. Run /handoff before closing.
+```
+
+**What you lose**: The automation. In Claude Code you get nudged automatically. In Droid you have to remember to start with `/session-init` and end with `/session-logger` + `/handoff`. Muscle memory from Claude Code helps, but there's no safety net if you forget.
 
 ## No Auto-Memory
 
-**Claude Code**: Has a persistent auto-memory directory where patterns and insights are recorded across sessions automatically.
+**Claude Code**: Each project gets a persistent auto-memory directory (`~/.claude/projects/*/memory/MEMORY.md`) where Claude automatically records patterns and insights across sessions. You never have to tell it to remember things — it just does.
 
-**Droid**: No equivalent auto-memory system.
+**Droid**: No equivalent.
 
-**Workaround**: Use session logs and handoff files for continuity. Maintain project-specific context files manually.
+**Workaround**: Maintain a `MEMORY.md` manually in your project. Use the `session-miner` droid periodically to identify patterns worth recording:
+
+```
+you> /session-miner
+droid> Analyzed 12 sessions over 30 days.
+       Reinforced patterns (appeared 3+ times):
+       - Always run tenant isolation tests after auth changes
+       - FastAPI dependency injection order matters for test fixtures
+       Recommend adding these to project MEMORY.md.
+```
 
 ## No Plan Mode
 
-**Claude Code**: Has a dedicated plan mode with enforced read-only exploration and user approval gates.
+**Claude Code**: Has a dedicated plan mode (`/plan` or triggered by the system) where Claude explores the codebase read-only, designs an approach, writes a plan file, and waits for your approval before making any changes.
 
-**Droid**: No structured planning mode.
+**Droid**: No structured planning mode with enforced read-only constraints.
 
-**Workaround**: Ask Droid to "analyze and plan before making changes" or use the `architect` droid for structured analysis.
+**Workaround**: Ask Droid explicitly:
+
+```
+you> I want to refactor the auth middleware. Don't make any changes yet —
+     just analyze the codebase and propose a plan.
+droid> [reads files, proposes plan]
+
+you> Looks good. Go ahead and implement step 1.
+```
+
+Or use the `architect` droid for structured analysis:
+
+```
+you> /architect
+droid> [comprehensive read-only analysis with recommendations]
+```
+
+**What you lose**: The enforced read-only guarantee. In Claude Code, plan mode physically prevents edits. In Droid, you're trusting the instruction — Droid *could* still make changes if it misinterprets your intent.
 
 ## Different Permissions Model
 
-**Claude Code**: Fine-grained `allow`/`deny` lists controlling which tools and commands can be executed (189 rules in the user's config).
+**Claude Code**: Fine-grained `allow`/`deny` lists in `settings.json` controlling exactly which tools and commands can be executed. The user's config has 189 rules like `Bash(git push:*)`, `Bash(docker compose:*)`, `Read(//Users/scottfrancis/.claude/**)`.
 
-**Droid**: Simpler `commandAllowlist`/`commandDenylist` with glob patterns.
+**Droid**: Simpler `commandAllowlist`/`commandDenylist` with glob patterns in [`settings.json`](https://docs.factory.ai/cli/configuration/settings):
 
-**Impact**: Less granular control. The allowlist approach covers most cases but can't restrict by argument patterns (e.g., `Bash(git push:*)` specifically).
+```json
+{
+  "commandAllowlist": ["git *", "docker *", "npm *"],
+  "commandDenylist": ["rm -rf /"]
+}
+```
+
+**Impact**: Less granular control. You can allow `git *` but you can't specifically allow `git push` while denying `git push --force`. The autonomy setting (`normal`, `auto-low`, `auto-medium`, `auto-high`) provides coarser control over what Droid does without asking.
 
 ## No $ARGUMENTS Variable
 
-**Claude Code**: Commands receive arguments via `$ARGUMENTS`.
+**Claude Code**: Commands receive structured arguments via `$ARGUMENTS`. Example: `/session-logger performance` passes "performance" as `$ARGUMENTS`, and the command template interpolates it into the output filename.
 
-**Droid**: Commands and droids receive context through natural language in the conversation.
+**Droid**: No structured argument passing. Arguments come through natural language in the conversation.
 
-**Workaround**: Droid instructions describe expected inputs. Users provide arguments naturally: "Run session-logger with topic: performance."
+**Concrete difference**:
+
+```
+# Claude Code — structured, one shot
+/session-logger performance
+
+# Droid — conversational
+/session-logger
+> Topic for this log: performance
+```
+
+**Impact**: Slightly more conversational friction. But droids can parse natural language well enough that "log this session, topic is performance" works fine.
 
 ## Settings Files Are Copied, Not Symlinked
 
-**Issue**: `settings.json` and `mcp.json` are copied during global install rather than symlinked, because users need to customize model selection, API keys, and MCP servers per-machine.
+**Issue**: `install.sh --global` copies `settings.json` and `mcp.json` rather than symlinking them, because these files contain machine-specific config (model preferences, API keys, MCP server paths).
 
-**Impact**: Updates to `dot-droid/global/settings.json` don't automatically propagate. Users must manually update or re-run the installer.
+**Impact**: If you update `dot-droid/global/settings.json` with new allowlist rules, existing installs won't pick up the change.
 
-**Workaround**: The installer skips existing files, so re-running is safe. Droids, commands, and skills are symlinked and do auto-propagate.
+**Workaround**: Re-run `./install.sh --global` — it skips existing files, so your customizations are safe. To force-update settings, delete the file first:
+
+```bash
+rm ~/.factory/settings.json
+./install.sh --global
+# Then re-apply your customizations
+```
+
+Droids, commands, and skills are symlinked and auto-propagate via `git pull`.
 
 ## No Skill Auto-Application by File Path
 
-**Claude Code**: Guidelines are manually referenced in CLAUDE.md.
+**Claude Code**: Guidelines are manually referenced in `CLAUDE.md`:
+```markdown
+Follow ~/.claude/guidelines/shell-scripts.md for all bash scripts.
+```
 
-**Copilot**: Instructions auto-apply via `applyTo` glob patterns.
+**Copilot**: Instructions auto-apply via `applyTo` glob patterns — the `shell-scripts` instruction fires automatically when editing `*.sh` files.
 
-**Droid**: Skills are available but not automatically applied based on file context. They must be invoked or referenced.
+**Droid**: Skills are available but not automatically applied based on file context. They must be invoked (`/shell-scripts`) or referenced in conversation ("follow the shell-scripts skill").
 
-**Workaround**: Encode critical guidelines (conventional commits, session safety) directly in droid instructions rather than relying on skill auto-invocation.
+**Workaround**: Encode critical rules directly in your droid instructions. For example, the `session-logger` droid includes conventional commit references inline rather than delegating to the skill. For project-specific enforcement, add instructions to `.droid.yaml`:
+
+```yaml
+guidelines:
+  - path: "**/*.sh"
+    instructions: "Follow the shell-scripts skill: set -euo pipefail, SCRIPT_DIR detection, cleanup traps."
+```
+
+This way `.droid.yaml` provides the auto-application that skills alone don't.
 
 ## Session Logs Are Separate
 
 **Decision**: Droid uses `~/.factory/logs/` instead of sharing `.claude/session-logs/`.
 
-**Impact**: No cross-tool session continuity. A handoff created in Claude Code won't be automatically found by the Droid `session-init` droid.
+**Impact**: A handoff file created in Claude Code (`~/.factory/logs/handoff-*.md` vs `.claude/session-logs/handoff-*.md`) won't automatically be found by the other tool.
 
-**Workaround**: The `session-init` droid checks both `~/.factory/logs/` and `.claude/session-logs/` for handoff files, providing some cross-tool continuity.
+**Workaround**: The `session-init` droid checks both locations:
+
+```
+you> /session-init
+droid> Checking ~/.factory/logs/ for recent handoffs... none found.
+       Checking .claude/session-logs/ for recent handoffs...
+       Found: .claude/session-logs/handoff-2026-03-05-1430.md (from Claude Code)
+       Loading context...
+```
+
+If you switch tools frequently, you could symlink one directory to the other, but the current design keeps them separate to avoid conflicts.
