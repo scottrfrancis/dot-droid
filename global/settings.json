@@ -1,0 +1,47 @@
+{
+  "model": "claude-opus-4-6",
+  "reasoningEffort": "high",
+  "autonomy": "normal",
+  "display": {
+    "diffMode": "unified",
+    "todoLayout": "sidebar",
+    "showThinking": true
+  },
+  "notifications": {
+    "enabled": true
+  },
+  "commandAllowlist": [
+    "git *",
+    "ls *",
+    "find *",
+    "chmod *",
+    "echo *",
+    "npm install *",
+    "npm ci *",
+    "npx *",
+    "python3 *",
+    "pip3 *",
+    "pytest *",
+    "conda *",
+    "brew *",
+    "docker *",
+    "docker-compose *",
+    "curl *",
+    "gh *",
+    "aws *",
+    "arduino-cli *",
+    "shellcheck *",
+    "cmake *",
+    "clang++ *",
+    "g++ *"
+  ],
+  "commandDenylist": [
+    "rm -rf /",
+    "rm -rf ~",
+    "pkill -9 droid"
+  ],
+  "commitAuthorship": {
+    "name": "Droid",
+    "email": "droid@factory.ai"
+  }
+}

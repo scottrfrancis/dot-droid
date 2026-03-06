@@ -1,0 +1,39 @@
+# .droid.yaml — Project-level Droid configuration
+# Place this file at the root of your project repository.
+# See: https://docs.factory.ai/onboarding/configuring-your-factory/droid-yaml-configuration
+
+reviews:
+  # Auto-review pull requests
+  auto_review: true
+
+  # PR summary generation
+  summary:
+    enabled: true
+    style: concise
+
+  # File-specific review instructions
+  guidelines:
+    - path: "**/*.sh"
+      instructions: "Check for set -euo pipefail, SCRIPT_DIR detection, proper quoting, cleanup traps, and portability."
+    - path: "**/*.md"
+      instructions: "Verify markdown formatting: blank lines around lists, proper heading hierarchy, no broken links."
+    - path: "**/*.py"
+      instructions: "Check for type hints, proper error handling, and security issues (injection, path traversal)."
+    - path: "**/*.ts"
+      instructions: "Check for TypeScript strict mode compliance, proper null handling, and async error propagation."
+    - path: "**/*.js"
+      instructions: "Check for proper error handling, no var usage, and security issues."
+    - path: "**/Dockerfile"
+      instructions: "Check for multi-stage builds, non-root user, minimal base image, and no secrets in build args."
+    - path: "**/docker-compose*.yml"
+      instructions: "Check port bindings (prefer 127.0.0.1), volume mounts, and secret handling."
+    - path: "**/*.puml"
+      instructions: "Verify C4 model conventions: modular includes, proper boundary definitions, descriptive relationship labels."
+
+  # Files to exclude from review
+  exclude:
+    - "**/*.lock"
+    - "**/node_modules/**"
+    - "**/.git/**"
+    - "**/dist/**"
+    - "**/build/**"

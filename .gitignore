@@ -1,0 +1,21 @@
+# Session artifacts
+.claude/session-logs/
+.claude/session-env/
+.claude/shell-snapshots/
+.claude/debug/
+.claude/file-history/
+.claude/telemetry/
+.claude/todos/
+.claude/plans/
+.claude/tasks/
+.claude/cache/
+.claude/paste-cache/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+*.swp
+*.swo
+*~

@@ -1,0 +1,66 @@
+#!/bin/bash
+# Session Cleanup
+# Run before every session to prevent hangs and context loss on hardware systems
+
+set -e
+
+echo "=== Session Cleanup ==="
+
+# Kill zombie processes
+echo "Terminating zombie processes..."
+pkill -f claude 2>/dev/null || true
+pkill -f droid 2>/dev/null || true
+sleep 2
+pkill -9 -f claude 2>/dev/null || true
+pkill -9 -f droid 2>/dev/null || true
+
+REMAINING=$(ps aux | grep -E "claude|droid" | grep -v grep | wc -l)
+if [ "$REMAINING" -gt 1 ]; then
+    echo "WARNING: $REMAINING processes still running"
+    ps aux | grep -E "claude|droid" | grep -v grep
+else
+    echo "Processes cleaned up"
+fi
+
+# Check device access
+echo "Checking NPU/GPU device access..."
+if lsof /dev/dri/card0 2>/dev/null; then
+    echo "WARNING: /dev/dri/card0 still in use:"
+    lsof /dev/dri/card0
+else
+    echo "NPU/GPU device available"
+fi
+
+# Clean Docker resources
+echo "Cleaning Docker environment..."
+docker container prune -f >/dev/null 2>&1 || true
+docker system prune -f >/dev/null 2>&1 || true
+echo "Docker resources cleaned"
+
+# Clear shared memory artifacts
+echo "Clearing shared memory artifacts..."
+rm -rf /dev/shm/rknn* 2>/dev/null || true
+rm -rf /dev/shm/npu* 2>/dev/null || true
+echo "Shared memory cleaned"
+
+# Clear temp files
+echo "Clearing temporary files..."
+find /tmp -name "*claude*" -mtime +1 -delete 2>/dev/null || true
+find /tmp -name "*droid*" -mtime +1 -delete 2>/dev/null || true
+echo "Temporary files cleaned"
+
+# System resource check
+echo "System resource status:"
+if command -v free >/dev/null 2>&1; then
+    echo "  Memory: $(free -h | grep Mem | awk '{print $3 "/" $2 " (" $7 " available)"}')"
+fi
+echo "  Load: $(uptime | awk -F'load average:' '{print $2}')"
+
+# Docker daemon check
+if timeout 5s docker version >/dev/null 2>&1; then
+    echo "Docker daemon responsive"
+else
+    echo "WARNING: Docker daemon not responding"
+fi
+
+echo "=== Cleanup Complete - Safe to start session ==="

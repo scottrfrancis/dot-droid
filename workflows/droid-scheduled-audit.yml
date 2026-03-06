@@ -1,0 +1,91 @@
+# Droid Scheduled Security/Architecture Audit
+# Copy this file to your project's .github/workflows/ directory.
+#
+# Runs weekly to audit the codebase for security issues and architectural drift.
+# Opens GitHub issues for findings.
+#
+# Prerequisites:
+# - FACTORY_API_KEY secret configured in repository settings
+# - security-auditor and architect droids available
+
+name: Droid Scheduled Audit
+
+on:
+  schedule:
+    # Run every Monday at 9am UTC
+    - cron: '0 9 * * 1'
+  workflow_dispatch:
+    inputs:
+      audit_type:
+        description: 'Type of audit to run'
+        required: true
+        default: 'security'
+        type: choice
+        options:
+          - security
+          - architecture
+          - both
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install Droid CLI
+        run: curl -fsSL https://app.factory.ai/cli | sh
+
+      - name: Determine audit type
+        id: audit-type
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "type=${{ inputs.audit_type }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "type=both" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Run Security Audit
+        if: steps.audit-type.outputs.type == 'security' || steps.audit-type.outputs.type == 'both'
+        env:
+          FACTORY_API_KEY: ${{ secrets.FACTORY_API_KEY }}
+        run: |
+          droid run --droid security-auditor \
+            --output /tmp/security-audit.md \
+            "Perform a security audit of this codebase and save findings to /tmp/security-audit.md"
+
+      - name: Run Architecture Review
+        if: steps.audit-type.outputs.type == 'architecture' || steps.audit-type.outputs.type == 'both'
+        env:
+          FACTORY_API_KEY: ${{ secrets.FACTORY_API_KEY }}
+        run: |
+          droid run --droid architect \
+            --output /tmp/arch-review.md \
+            "Perform an architectural review of this codebase and save findings to /tmp/arch-review.md"
+
+      - name: Create Issue from Findings
+        if: always()
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          DATE=$(date +%Y-%m-%d)
+
+          if [ -f /tmp/security-audit.md ]; then
+            gh issue create \
+              --title "Security Audit Findings - ${DATE}" \
+              --body-file /tmp/security-audit.md \
+              --label "security,automated-audit"
+          fi
+
+          if [ -f /tmp/arch-review.md ]; then
+            gh issue create \
+              --title "Architecture Review - ${DATE}" \
+              --body-file /tmp/arch-review.md \
+              --label "architecture,automated-audit"
+          fi

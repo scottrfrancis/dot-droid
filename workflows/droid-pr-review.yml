@@ -1,0 +1,40 @@
+# Droid-powered PR Review
+# Copy this file to your project's .github/workflows/ directory.
+#
+# Prerequisites:
+# - FACTORY_API_KEY secret configured in repository settings
+# - .droid.yaml in the project root with review configuration
+#
+# See: https://docs.factory.ai/integrations/github-actions
+
+name: Droid PR Review
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install Droid CLI
+        run: curl -fsSL https://app.factory.ai/cli | sh
+
+      - name: Run Droid Review
+        env:
+          FACTORY_API_KEY: ${{ secrets.FACTORY_API_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          droid review \
+            --pr "${{ github.event.pull_request.number }}" \
+            --repo "${{ github.repository }}" \
+            --config .droid.yaml
