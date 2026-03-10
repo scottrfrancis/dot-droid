@@ -1,5 +1,5 @@
 ---
-name: "session-init"
+name: "lets-go"
 description: "Session initialization with git sync protocol, project overview, and context loading"
 model: "claude-opus-4-6"
 tools: ["read", "execute"]
@@ -13,7 +13,7 @@ Set initial context for a working session.
 
 Since Droid has no SessionStart hooks, manually check for recent handoff files:
 
-1. Look for the most recent `handoff-*.md` file in `~/.factory/logs/` and `.claude/session-logs/`
+1. Look for the most recent `handoff-*.md` file in `.factory/logs/` (project-local) and `.claude/session-logs/` (Claude Code cross-tool)
 2. If found and less than 7 days old, read it and incorporate as session context
 3. Report: "Loaded handoff context from [filename]" or "No recent handoff found"
 

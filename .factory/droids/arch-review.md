@@ -1,5 +1,5 @@
 ---
-name: "architect"
+name: "arch-review"
 description: "Principal Architect review against AWS Well-Architected, SOLID, security, and AI patterns"
 model: "claude-opus-4-6"
 tools: ["read", "execute", "web"]

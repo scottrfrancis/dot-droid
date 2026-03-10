@@ -15,11 +15,11 @@ Generate a continuation prompt capturing current session state for the next sess
 2. Run `git status` and `git diff --stat` for uncommitted changes
 3. Check `git log --oneline -5` for recent commits this session
 4. Read any active TODO lists or plan files
-5. Check for recent session logs (`~/.factory/logs/`) for additional context
+5. Check for recent session logs (`.factory/logs/`) for additional context
 
 ## Generate Continuation Prompt
 
-Write to `~/.factory/logs/handoff-YYYY-MM-DD-HHMM.md` using the current date and time.
+Write to `.factory/logs/handoff-YYYY-MM-DD-HHMM.md` using the current date and time.
 
 Use this structure:
 

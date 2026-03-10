@@ -37,16 +37,24 @@ If you're coming from Claude Code, this is the translation layer. Everything you
 This creates `~/.factory/` and populates it:
 
 ```
-~/.factory/
-├── settings.json       # COPIED — edit freely for your model/autonomy prefs
-├── mcp.json            # COPIED — add your MCP servers here
-├── droids/  -> /Volumes/workspace/dot-droid/global/droids/    # SYMLINKED
-├── commands/ -> /Volumes/workspace/dot-droid/global/commands/  # SYMLINKED
-├── skills/  -> /Volumes/workspace/dot-droid/global/skills/    # SYMLINKED
-└── logs/               # Created for session logs
+~/.factory  ->  /path/to/dot-droid/.factory/    # SINGLE SYMLINK
 ```
 
-**Why the split?** `settings.json` and `mcp.json` contain machine-specific config (API keys, model preferences), so they're copied. Droids, commands, and skills are symlinked so that `git pull` on this repo updates them everywhere.
+Inside that directory:
+
+```
+~/.factory/
+├── settings.json       # GITIGNORED — edit freely for your model/autonomy prefs
+├── mcp.json            # GITIGNORED — add your MCP servers here
+├── settings.json.example  # Committed template — copy of defaults
+├── mcp.json.example       # Committed template — copy of defaults
+├── droids/             # Committed — live via symlink
+├── commands/           # Committed — live via symlink
+├── skills/             # Committed — live via symlink
+└── logs/               # Gitignored — global checkpoint logs
+```
+
+**Why this structure?** `~/.factory` is a single symlink to the repo's `.factory/` directory. All droids, commands, and skills are live immediately — `git pull` propagates changes everywhere. `settings.json` and `mcp.json` are gitignored so machine-specific config (model preferences, MCP server paths) stays local.
 
 ### Step 2: Install project template (per-project)
 
@@ -71,8 +79,8 @@ cd /Volumes/workspace/my-project
 droid
 
 # You should see your custom droids available
-> /architect
-> /session-init
+> /arch-review
+> /lets-go
 ```
 
 ## How to Use Everything
@@ -83,28 +91,29 @@ Droids are the Droid equivalent of Claude Code's `/slash-commands` for complex, 
 
 **Where they live**: `~/.factory/droids/` (global) or `.factory/droids/` (per-project override)
 
-**How to invoke them**: Type `/droid-name` or ask Droid to "use the architect droid" in conversation.
+**How to invoke them**: Type `/droid-name` or ask Droid to "use the arch-review droid" in conversation.
 
 **Reference**: [Custom Droids docs](https://docs.factory.ai/cli/configuration/custom-droids)
 
-| Droid | Claude Code Equivalent | What It Does |
-|---|---|---|
-| `session-init` | `/lets-go` | Loads recent handoff, syncs git, reviews project docs, reports status |
-| `session-logger` | `/session-logger` | Creates session summary in `~/.factory/logs/YYYY-MM-DD-HHMM.md` |
-| `handoff` | `/handoff` | Generates continuation prompt in `~/.factory/logs/handoff-YYYY-MM-DD-HHMM.md` |
-| `session-miner` | `/mine-sessions` | Analyzes `~/.factory/logs/` for patterns and metrics |
-| `architect` | `/arch-review` | Full architecture review (Well-Architected, SOLID, security, AI patterns) |
-| `editorial` | `/editorial-review` | Audits prose for AI tells; accepts style parameter |
-| `security-auditor` | `/security-audit` | Breach-driven security audit of web applications |
+| Droid | What It Does |
+|---|---|
+| `lets-go` | Fresh session start: git sync, project docs review, status report |
+| `pickup` | Resume after context clear: loads most recent handoff, nothing else |
+| `session-logger` | Creates session summary in `.factory/logs/YYYY-MM-DD-HHMM.md` |
+| `handoff` | Generates continuation prompt in `.factory/logs/handoff-YYYY-MM-DD-HHMM.md` |
+| `mine-sessions` | Analyzes `.factory/logs/` for patterns and metrics |
+| `arch-review` | Full architecture review (Well-Architected, SOLID, security, AI patterns) |
+| `editorial-review` | Audits prose for AI tells; accepts style parameter |
+| `security-audit` | Breach-driven security audit of web applications |
 
 #### Concrete examples
 
-**Starting a session** (replaces `/lets-go`):
+**Starting a session**:
 
 ```
-you> /session-init
+you> /lets-go
 droid> Checking for recent handoff files...
-       Found: ~/.factory/logs/handoff-2026-03-05-1430.md
+       Found: .factory/logs/handoff-2026-03-05-1430.md
        Loading context from previous session...
 
        Running git sync...
@@ -119,21 +128,32 @@ droid> Checking for recent handoff files...
        2. Continue with tenant isolation tests (carry-forward from last session)
 ```
 
-**Ending a session** (replaces `/session-logger` + `/handoff`):
+**Resuming after a context clear**:
+
+```
+you> /pickup
+droid> Picked up: .factory/logs/handoff-2026-03-06-1430.md
+
+       Continuing: tenant isolation tests for the auth middleware refactor
+
+       Next step: Add test for cross-tenant data access via /reports endpoint
+```
+
+**Ending a session**:
 
 ```
 you> /session-logger
-droid> Session log saved to ~/.factory/logs/2026-03-06-1700-auth-hardening.md
+droid> Session log saved to .factory/logs/2026-03-06-1700-auth-hardening.md
        Reminder: You changed 8 files this session. Run /handoff before closing.
 
 you> /handoff
-droid> Continuation prompt saved to ~/.factory/logs/handoff-2026-03-06-1705.md
+droid> Continuation prompt saved to .factory/logs/handoff-2026-03-06-1705.md
 ```
 
 **Running an architecture review**:
 
 ```
-you> /architect
+you> /arch-review
 droid> [reads project structure, tests, configs, specs]
        ...
        Report saved to docs/arch-review-2026-03-06-170532.md
@@ -144,10 +164,10 @@ droid> [reads project structure, tests, configs, specs]
        Low: 3
 ```
 
-**Auditing a blog post** (replaces `/editorial-review`):
+**Auditing a blog post**:
 
 ```
-you> /editorial review my draft at docs/blog-post.md in the style of Paul Graham
+you> /editorial-review review my draft at docs/blog-post.md in the style of Paul Graham
 droid> Reading docs/blog-post.md...
        Target voice: Paul Graham (short sentences, direct claims, conversational)
 
@@ -338,9 +358,9 @@ Claude Code has `SessionStart` and `Stop` hooks that fire automatically. Droid d
 ┌─────────────────────────────────────────────────┐
 │  Claude Code (automatic)    Droid (manual)       │
 │                                                   │
-│  [SessionStart hook]        /session-init         │
+│  [SessionStart hook]        /lets-go              │
 │       ↓                          ↓                │
-│  /lets-go                   (built into droid)    │
+│  /lets-go                   (manual, same cmd)    │
 │       ↓                          ↓                │
 │  [work]                     [work]                │
 │       ↓                          ↓                │
@@ -359,17 +379,17 @@ droid
 ```
 
 ```
-you> /session-init
+you> /lets-go
 droid> [loads handoff, syncs git, reports status, suggests next steps]
 
 you> [... do your work ...]
 
 you> /session-logger
-droid> [saves summary to ~/.factory/logs/2026-03-06-1700-topic.md]
+droid> [saves summary to .factory/logs/2026-03-06-1700-topic.md]
        Reminder: Run /handoff if you're stopping for the day.
 
 you> /handoff
-droid> [saves continuation prompt to ~/.factory/logs/handoff-2026-03-06-1705.md]
+droid> [saves continuation prompt to .factory/logs/handoff-2026-03-06-1705.md]
 ```
 
 ## Overriding Configuration
@@ -379,10 +399,10 @@ droid> [saves continuation prompt to ~/.factory/logs/handoff-2026-03-06-1705.md]
 Create a file with the same name in the project's `.factory/droids/`:
 
 ```bash
-# Example: customize the architect droid for a Python-only project
-cat > /Volumes/workspace/my-python-project/.factory/droids/architect.md << 'EOF'
+# Example: customize the arch-review droid for a Python-only project
+cat > /Volumes/workspace/my-python-project/.factory/droids/arch-review.md << 'EOF'
 ---
-name: "architect"
+name: "arch-review"
 description: "Python-focused architecture review"
 model: "claude-opus-4-6"
 tools: ["read", "execute"]
@@ -390,7 +410,7 @@ tools: ["read", "execute"]
 
 # Architecture Review (Python Focus)
 
-Same as the global architect droid, but skip JavaScript/TypeScript checks.
+Same as the global arch-review droid, but skip JavaScript/TypeScript checks.
 Focus on:
 - Python packaging (pyproject.toml, setup.cfg)
 - FastAPI/Django patterns
@@ -442,17 +462,18 @@ dot-droid/
 ├── install.sh                             # Global and project installer
 ├── .gitignore
 │
-├── global/                                # THE DELIVERABLE — ~/.factory/ config
-│   ├── settings.json                      # Model, autonomy, allowlists
-│   ├── mcp.json                           # MCP server integrations
-│   ├── droids/                            # 7 custom subagents
-│   │   ├── architect.md
-│   │   ├── session-init.md
+├── .factory/                              # THE DELIVERABLE — symlinked to ~/.factory/
+│   ├── settings.json.example              # Model, autonomy, allowlists (template)
+│   ├── mcp.json.example                   # MCP server integrations (template)
+│   ├── droids/                            # 8 custom subagents
+│   │   ├── lets-go.md
+│   │   ├── pickup.md
 │   │   ├── session-logger.md
 │   │   ├── handoff.md
-│   │   ├── session-miner.md
-│   │   ├── editorial.md
-│   │   └── security-auditor.md
+│   │   ├── mine-sessions.md
+│   │   ├── arch-review.md
+│   │   ├── editorial-review.md
+│   │   └── security-audit.md
 │   ├── commands/                          # 5 slash commands / scripts
 │   │   ├── autocommit.md
 │   │   ├── commit-manual                  # bash
@@ -490,10 +511,10 @@ dot-droid/
 |---|---|---|
 | Global config | `~/.claude/` (automatic) | `~/.factory/` (automatic) |
 | Start a session | `claude` | `droid` |
-| Slash commands | `/lets-go` | `/session-init` |
+| Slash commands | `/lets-go` | `/lets-go` (same names) |
 | Guidelines | `~/.claude/guidelines/*.md` (manual reference) | `~/.factory/skills/*/SKILL.md` ([docs](https://docs.factory.ai/cli/configuration/skills)) |
 | Subagents | Agent tool (built-in) | Custom droids ([docs](https://docs.factory.ai/cli/configuration/custom-droids)) |
-| Lifecycle hooks | SessionStart, Stop (automatic) | None — use `/session-init` manually |
+| Lifecycle hooks | SessionStart, Stop (automatic) | None — use `/lets-go` manually |
 | Auto-memory | Built-in per-project memory | Not available |
 | Plan mode | Built-in read-only exploration | Not available (ask Droid to "plan first") |
 | Multi-model | Claude only | Any provider via BYOK ([docs](https://docs.factory.ai/cli/configuration/settings)) |

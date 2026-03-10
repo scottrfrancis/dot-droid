@@ -1,3 +1,8 @@
+# Machine-local factory config (not committed — use .example templates)
+.factory/settings.json
+.factory/mcp.json
+.factory/logs/
+
 # Session artifacts
 .claude/session-logs/
 .claude/session-env/

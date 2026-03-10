@@ -1,5 +1,5 @@
 ---
-name: "security-auditor"
+name: "security-audit"
 description: "Breach-driven security audit for web applications"
 model: "claude-opus-4-6"
 tools: ["read", "execute", "web"]

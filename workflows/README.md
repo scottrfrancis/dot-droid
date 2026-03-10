@@ -55,7 +55,7 @@ guidelines:
 
 Runs weekly security and/or architecture audits and opens GitHub issues with findings.
 
-**What it does**: Every Monday at 9am UTC (or on manual trigger), runs the `security-auditor` and `architect` droids against your codebase and creates GitHub issues for findings.
+**What it does**: Every Monday at 9am UTC (or on manual trigger), runs the `security-audit` and `arch-review` droids against your codebase and creates GitHub issues for findings.
 
 **Triggers**: Weekly cron or manual `workflow_dispatch`
 

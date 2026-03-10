@@ -7,14 +7,14 @@ tools: ["read", "execute", "edit"]
 
 # Session Logger
 
-Create a comprehensive session summary and save it to `~/.factory/logs/` with proper organization.
+Create a comprehensive session summary and save it to `.factory/logs/` with proper organization.
 
 ## Setup
 
 Create the logs directory if it doesn't exist:
 
 ```bash
-mkdir -p ~/.factory/logs
+mkdir -p .factory/logs
 ```
 
 ## Gather Context
@@ -23,7 +23,7 @@ Review the conversation history to identify what was accomplished. Also check gi
 
 ## Link to Previous Session
 
-Find the most recent session log in `~/.factory/logs/` (excluding `mine-report-*` and `handoff-*` files). If found, add to the header:
+Find the most recent session log in `.factory/logs/` (excluding `mine-report-*` and `handoff-*` files). If found, add to the header:
 
 ```markdown
 **Previous Session**: [filename](filename) — [one-line summary from that log's Summary section]
@@ -33,7 +33,7 @@ This creates a browsable chain across sessions. If no previous session log exist
 
 ## Generate Session Summary
 
-Save to: `~/.factory/logs/YYYY-MM-DD-HHMM[-topic].md`
+Save to: `.factory/logs/YYYY-MM-DD-HHMM[-topic].md`
 
 ### Required Sections
 

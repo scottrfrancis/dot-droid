@@ -8,10 +8,10 @@ This repository contains portable Factory.AI Droid configuration files — the D
 
 ## Repository Structure
 
-- `global/` — The deliverable: global ~/.factory/ config files
-  - `settings.json` — Model, autonomy, allowlists/denylists
-  - `mcp.json` — MCP server integrations
-  - `droids/` — Custom subagents (architect, session-init, etc.)
+- `.factory/` — The deliverable: symlinked to `~/.factory/` on install
+  - `settings.json.example` — Model, autonomy, allowlists/denylists template (gitignored locally)
+  - `mcp.json.example` — MCP server integrations template (gitignored locally)
+  - `droids/` — Custom subagents (lets-go, arch-review, etc.)
   - `commands/` — Slash commands (autocommit, commit-manual, etc.)
   - `skills/` — Reusable skill packages (shell-scripts, conventional-commits, etc.)
 - `project/` — Per-project template (.droid.yaml + .factory/)
@@ -25,10 +25,10 @@ Each file maps to a Claude Code equivalent:
 
 | This Repo | Claude Code Equivalent |
 |---|---|
-| `global/settings.json` | `~/.claude/settings.json` |
-| `global/droids/*.md` | `~/.claude/commands/*.md` (complex commands) |
-| `global/commands/*` | `~/.claude/commands/*` (simple/bash commands) |
-| `global/skills/*/SKILL.md` | `~/.claude/guidelines/*.md` |
+| `.factory/settings.json` | `~/.claude/settings.json` |
+| `.factory/droids/*.md` | `~/.claude/commands/*.md` (complex commands) |
+| `.factory/commands/*` | `~/.claude/commands/*` (simple/bash commands) |
+| `.factory/skills/*/SKILL.md` | `~/.claude/guidelines/*.md` |
 
 ## Development Guidelines
 

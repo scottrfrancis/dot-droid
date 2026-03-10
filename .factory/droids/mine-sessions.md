@@ -1,5 +1,5 @@
 ---
-name: "session-miner"
+name: "mine-sessions"
 description: "Analyze session logs for patterns, metrics, and process improvements"
 model: "claude-opus-4-6"
 tools: ["read", "execute", "edit"]
@@ -11,7 +11,7 @@ Analyze session logs to extract patterns, quantitative metrics, and actionable f
 
 ## Step 1: Gather Data
 
-Read all `.md` files in `~/.factory/logs/` modified within the last 30 days. Use file timestamps and `**Date**:` frontmatter. Count total sessions, list topics by filename keywords.
+Read all `.md` files in `.factory/logs/` modified within the last 30 days. Use file timestamps and `**Date**:` frontmatter. Count total sessions, list topics by filename keywords.
 
 ## Step 2: Session Metrics
 
@@ -42,7 +42,7 @@ Based on all analysis, generate prioritized recommendations:
 
 ## Step 5: Output
 
-Present the report with clear section headers and tables. Optionally save to `~/.factory/logs/mine-report-YYYY-MM-DD.md`.
+Present the report with clear section headers and tables. Optionally save to `.factory/logs/mine-report-YYYY-MM-DD.md`.
 
 ## Rules
 

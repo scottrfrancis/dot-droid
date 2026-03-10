@@ -2,16 +2,16 @@
 # Installer for dot-droid configuration.
 #
 # Two modes:
-#   ./install.sh --global           # Symlink global/ contents to ~/.factory/
+#   ./install.sh --global           # Symlink ~/.factory -> dot-droid/.factory/
 #   ./install.sh /path/to/project   # Copy project template into target
 #
-# Global install creates symlinks so updates to dot-droid propagate
-# automatically. Project install copies templates (no symlinks).
+# Global install creates a single symlink so all changes to the repo
+# propagate to ~/.factory/ automatically. Project install copies templates.
 
 set -euo pipefail
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-GLOBAL_SOURCE="${SCRIPT_DIR}/global"
+GLOBAL_SOURCE="${SCRIPT_DIR}/.factory"
 PROJECT_SOURCE="${SCRIPT_DIR}/project"
 FACTORY_HOME="${HOME}/.factory"
 
@@ -80,11 +80,11 @@ copy_if_missing() {
 # --- Usage ---
 
 usage() {
-  echo "Usage: $0 --global              # Install global config to ~/.factory/"
+  echo "Usage: $0 --global              # Symlink ~/.factory -> dot-droid/.factory/"
   echo "       $0 /path/to/project      # Install project template"
   echo "       $0 -h | --help"
   echo ""
-  echo "Global install: symlinks droids/, commands/, skills/ to ~/.factory/"
+  echo "Global install: single symlink ~/.factory -> $(basename "${SCRIPT_DIR}")/.factory/"
   echo "Project install: copies .droid.yaml and .factory/ template to target"
 }
 
@@ -101,32 +101,45 @@ if [[ "$1" == "--global" ]]; then
   echo "  Target: ${FACTORY_HOME}"
   echo ""
 
-  mkdir -p "${FACTORY_HOME}"
-  mkdir -p "${FACTORY_HOME}/logs"
-
   echo "Linking configuration:"
 
-  # Settings and MCP — copy rather than symlink so user can customize
-  copy_if_missing "${GLOBAL_SOURCE}/settings.json" "${FACTORY_HOME}/settings.json"
-  copy_if_missing "${GLOBAL_SOURCE}/mcp.json" "${FACTORY_HOME}/mcp.json"
+  # Single symlink: ~/.factory -> dot-droid/.factory/
+  if [[ -L "${FACTORY_HOME}" ]]; then
+    existing_target=$(readlink "${FACTORY_HOME}")
+    if [[ "$existing_target" == "${GLOBAL_SOURCE}" ]]; then
+      echo "  [skip] ~/.factory — already linked"
+    else
+      echo "  [update] ~/.factory — updating symlink"
+      rm "${FACTORY_HOME}"
+      ln -s "${GLOBAL_SOURCE}" "${FACTORY_HOME}"
+    fi
+  elif [[ -d "${FACTORY_HOME}" ]]; then
+    echo "  [skip] ~/.factory — real directory exists (will not overwrite)"
+    echo "         Move or remove ~/.factory to switch to symlink install."
+    exit 1
+  else
+    echo "  [link] ~/.factory -> ${GLOBAL_SOURCE}"
+    ln -s "${GLOBAL_SOURCE}" "${FACTORY_HOME}"
+  fi
 
-  # Directories — symlink for auto-propagation
-  link_directory "${GLOBAL_SOURCE}/droids" "${FACTORY_HOME}/droids"
-  link_directory "${GLOBAL_SOURCE}/commands" "${FACTORY_HOME}/commands"
-  link_directory "${GLOBAL_SOURCE}/skills" "${FACTORY_HOME}/skills"
+  mkdir -p "${FACTORY_HOME}/logs"
+
+  # Settings and MCP — copy from .example if not already present
+  # Files live in the repo dir (.factory/) but are gitignored — machine-local
+  copy_if_missing "${GLOBAL_SOURCE}/settings.json.example" "${FACTORY_HOME}/settings.json"
+  copy_if_missing "${GLOBAL_SOURCE}/mcp.json.example" "${FACTORY_HOME}/mcp.json"
 
   echo ""
   echo "Global installation complete."
   echo ""
-  echo "Linked components:"
-  echo "  ~/.factory/settings.json  <- copied (customize freely)"
-  echo "  ~/.factory/mcp.json       <- copied (customize freely)"
-  echo "  ~/.factory/droids/        -> dot-droid/global/droids/"
-  echo "  ~/.factory/commands/      -> dot-droid/global/commands/"
-  echo "  ~/.factory/skills/        -> dot-droid/global/skills/"
+  echo "Linked:"
+  echo "  ~/.factory -> ${GLOBAL_SOURCE}"
   echo ""
-  echo "To override any component, replace the symlink with a real"
-  echo "file or directory."
+  echo "Machine-local (gitignored, edit freely):"
+  echo "  ~/.factory/settings.json   — model, autonomy, allowlists"
+  echo "  ~/.factory/mcp.json        — MCP server integrations"
+  echo ""
+  echo "All droids, commands, and skills are live immediately via the symlink."
   exit 0
 fi
 
@@ -161,12 +174,19 @@ if [[ ! -e "${TARGET_DIR}/.factory/droids/.gitkeep" ]]; then
   echo "  [create] .factory/droids/.gitkeep"
 fi
 
+mkdir -p "${TARGET_DIR}/.factory/logs"
+if [[ ! -e "${TARGET_DIR}/.factory/logs/.gitignore" ]]; then
+  printf '*\n!.gitignore\n' > "${TARGET_DIR}/.factory/logs/.gitignore"
+  echo "  [create] .factory/logs/.gitignore"
+fi
+
 echo ""
 echo "Project installation complete."
 echo ""
 echo "Installed components:"
 echo "  .droid.yaml               — PR review configuration"
 echo "  .factory/droids/          — Project-local droid overrides (empty)"
+echo "  .factory/logs/            — Session logs (gitignored)"
 echo ""
 echo "Add project-specific droids to .factory/droids/ to override"
 echo "or extend the global configuration."

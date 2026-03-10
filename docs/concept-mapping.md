@@ -9,16 +9,17 @@ If you know Claude Code, here's the cheat sheet:
 | You're used to... | In Droid, do this instead |
 |---|---|
 | `claude` | `droid` |
-| `/lets-go` | `/session-init` |
-| `/session-logger` | `/session-logger` |
-| `/handoff` | `/handoff` |
-| `/arch-review` | `/architect` |
-| `/security-audit` | `/security-auditor` |
-| `/editorial-review style` | `/editorial` then describe the style in chat |
-| `/mine-sessions days:30` | `/session-miner` then say "last 30 days" |
+| `/lets-go` | `/lets-go` (same name) |
+| `/session-logger` | `/session-logger` (same name) |
+| `/handoff` | `/handoff` (same name) |
+| `/arch-review` | `/arch-review` (same name) |
+| `/security-audit` | `/security-audit` (same name) |
+| `/editorial-review style` | `/editorial-review` then describe the style in chat |
+| `/mine-sessions days:30` | `/mine-sessions` then say "last 30 days" |
 | `/autocommit -y` | `/autocommit` then confirm in chat |
 | `~/.claude/guidelines/shell-scripts.md` | `/shell-scripts` skill or "follow the shell-scripts skill" |
-| SessionStart hook auto-loads handoff | `/session-init` does it manually as step 1 |
+| SessionStart hook auto-loads handoff | `/pickup` — dedicated post-context-clear resume |
+| `/lets-go` (fresh session start) | `/lets-go` (same name) |
 | Stop hook reminds about logging | `/session-logger` and `/handoff` cross-remind each other |
 
 ## Configuration Files
@@ -63,13 +64,14 @@ you> /conventional-commits
 
 | Claude Code | Copilot | Droid | Invocation Example |
 |---|---|---|---|
-| `/lets-go` | `lets-go` agent (dropdown) | `/session-init` | `you> /session-init` |
+| `/lets-go` | `lets-go` agent (dropdown) | `/lets-go` | `you> /lets-go` |
+| SessionStart hook (post-clear) | N/A | `/pickup` | `you> /pickup` |
 | `/session-logger [topic]` | `session-logger` agent | `/session-logger` | `you> /session-logger` then "topic: auth hardening" |
 | `/handoff [notes]` | `handoff` agent | `/handoff` | `you> /handoff` |
-| `/mine-sessions days:30` | `mine-sessions` agent | `/session-miner` | `you> /session-miner` then "analyze last 30 days" |
-| `/arch-review` | `arch-review` agent | `/architect` | `you> /architect` |
-| `/editorial-review "Paul Graham"` | N/A | `/editorial` | `you> /editorial` then "review blog-post.md in Paul Graham's style" |
-| `/security-audit` | N/A | `/security-auditor` | `you> /security-auditor` |
+| `/mine-sessions days:30` | `mine-sessions` agent | `/mine-sessions` | `you> /mine-sessions` then "analyze last 30 days" |
+| `/arch-review` | `arch-review` agent | `/arch-review` | `you> /arch-review` |
+| `/editorial-review "Paul Graham"` | N/A | `/editorial-review` | `you> /editorial-review` then "review blog-post.md in Paul Graham's style" |
+| `/security-audit` | N/A | `/security-audit` | `you> /security-audit` |
 | `/autocommit -y -t fix` | `autocommit` agent | `/autocommit` | `you> /autocommit` then "this is a bug fix, auto-confirm" |
 | `~/.claude/commands/commit-manual feat auth "msg"` | N/A | `~/.factory/commands/commit-manual feat auth "msg"` | Run from terminal directly |
 | `~/.claude/commands/checkpoint-progress` | `checkpoint-progress` agent | `~/.factory/commands/checkpoint-progress` | Run from terminal directly |
@@ -108,7 +110,7 @@ you> /conventional-commits
 
 **Claude Code**: Fully automatic. SessionStart hook injects last handoff. Stop hook reminds you to log. You just type `/session-logger` and `/handoff` when prompted.
 
-**Droid**: Manual. Start every session with `/session-init` (it checks for handoffs and syncs git). End every session with `/session-logger` then `/handoff`. The droids remind you about each other, but you have to remember to start and end the cycle.
+**Droid**: Manual. Start every session with `/lets-go` (it checks for handoffs and syncs git). End every session with `/session-logger` then `/handoff`. The droids remind you about each other, but you have to remember to start and end the cycle.
 
 ## Global vs Per-Project
 
@@ -121,13 +123,13 @@ you> /conventional-commits
 
 ### Override example
 
-To customize the `architect` droid for one project:
+To customize the `arch-review` droid for one project:
 
 **Claude Code**: Create `.claude/commands/arch-review.md` in the project (shadows `~/.claude/commands/arch-review.md`)
 
 **Copilot**: Replace `.github/agents/arch-review.md` symlink with a real file
 
-**Droid**: Create `.factory/droids/architect.md` in the project (overrides `~/.factory/droids/architect.md`)
+**Droid**: Create `.factory/droids/arch-review.md` in the project (overrides `~/.factory/droids/arch-review.md`)
 
 ## Automation / CI/CD
 
@@ -141,8 +143,8 @@ To customize the `architect` droid for one project:
 
 | Aspect | Claude Code | Copilot | Droid |
 |---|---|---|---|
-| Log directory | `.claude/session-logs/` | `.claude/session-logs/` (shared) | `~/.factory/logs/` (separate) |
+| Log directory | `.claude/session-logs/` | `.claude/session-logs/` (shared) | `.factory/logs/` (per-project) |
 | Handoff format | `handoff-YYYY-MM-DD-HHMM.md` | Same | Same |
 | Auto-memory | `~/.claude/projects/*/memory/` | No equivalent | No equivalent |
 | Plan mode | Built-in (enforced read-only) | No equivalent | No equivalent |
-| Cross-tool handoff | N/A | Reads `.claude/session-logs/` | `session-init` checks both `~/.factory/logs/` and `.claude/session-logs/` |
+| Cross-tool handoff | N/A | Reads `.claude/session-logs/` | `lets-go` checks both `.factory/logs/` and `.claude/session-logs/` |

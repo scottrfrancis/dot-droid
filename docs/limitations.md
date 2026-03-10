@@ -8,11 +8,16 @@ This document describes Claude Code features that have no direct Droid equivalen
 
 **Droid**: No lifecycle hook system. Nothing runs automatically when you start or end a session.
 
-**Workaround**: Run `/session-init` at the start of every session. It does the same work as the SessionStart hook (finds and loads recent handoff) plus the `/lets-go` command (syncs git, reviews project docs):
+**Workaround**: Two commands cover the two scenarios:
+
+- **`/lets-go`** — fresh session start (git sync, project docs review, status report). Optionally loads a recent handoff if one exists.
+- **`/pickup`** — resume after context clear. Loads the most recent handoff only, no overhead. This is the closest manual equivalent to the SessionStart hook.
+
+Use `/pickup` after a context clear:
 
 ```
-you> /session-init
-droid> Found handoff: ~/.factory/logs/handoff-2026-03-05-1430.md
+you> /lets-go
+droid> Found handoff: .factory/logs/handoff-2026-03-05-1430.md
        Branch main is up to date with origin.
        ...
 ```
@@ -21,11 +26,11 @@ For session end, `/session-logger` reminds you about `/handoff` and vice versa:
 
 ```
 you> /session-logger
-droid> Session log saved to ~/.factory/logs/2026-03-06-1700-auth.md
+droid> Session log saved to .factory/logs/2026-03-06-1700-auth.md
        Reminder: You changed 8 files. Run /handoff before closing.
 ```
 
-**What you lose**: The automation. In Claude Code you get nudged automatically. In Droid you have to remember to start with `/session-init` and end with `/session-logger` + `/handoff`. Muscle memory from Claude Code helps, but there's no safety net if you forget.
+**What you lose**: The automation. In Claude Code you get nudged automatically. In Droid you have to remember to start with `/lets-go` and end with `/session-logger` + `/handoff`. Muscle memory from Claude Code helps, but there's no safety net if you forget.
 
 ## No Auto-Memory
 
@@ -33,10 +38,10 @@ droid> Session log saved to ~/.factory/logs/2026-03-06-1700-auth.md
 
 **Droid**: No equivalent.
 
-**Workaround**: Maintain a `MEMORY.md` manually in your project. Use the `session-miner` droid periodically to identify patterns worth recording:
+**Workaround**: Maintain a `MEMORY.md` manually in your project. Use the `mine-sessions` droid periodically to identify patterns worth recording:
 
 ```
-you> /session-miner
+you> /mine-sessions
 droid> Analyzed 12 sessions over 30 days.
        Reinforced patterns (appeared 3+ times):
        - Always run tenant isolation tests after auth changes
@@ -60,10 +65,10 @@ droid> [reads files, proposes plan]
 you> Looks good. Go ahead and implement step 1.
 ```
 
-Or use the `architect` droid for structured analysis:
+Or use the `arch-review` droid for structured analysis:
 
 ```
-you> /architect
+you> /arch-review
 droid> [comprehensive read-only analysis with recommendations]
 ```
 
@@ -103,21 +108,19 @@ droid> [comprehensive read-only analysis with recommendations]
 
 **Impact**: Slightly more conversational friction. But droids can parse natural language well enough that "log this session, topic is performance" works fine.
 
-## Settings Files Are Copied, Not Symlinked
+## Settings Are Machine-Local
 
-**Issue**: `install.sh --global` copies `settings.json` and `mcp.json` rather than symlinking them, because these files contain machine-specific config (model preferences, API keys, MCP server paths).
+**Design**: `settings.json` and `mcp.json` are gitignored in the `.factory/` directory. They exist on disk (in the repo dir, since `~/.factory` is a symlink to it) but are never committed.
 
-**Impact**: If you update `dot-droid/global/settings.json` with new allowlist rules, existing installs won't pick up the change.
+**Impact**: If you pull upstream changes to `settings.json.example`, your local `settings.json` is not automatically updated.
 
-**Workaround**: Re-run `./install.sh --global` — it skips existing files, so your customizations are safe. To force-update settings, delete the file first:
+**Workaround**: Periodically diff your local settings against the example:
 
 ```bash
-rm ~/.factory/settings.json
-./install.sh --global
-# Then re-apply your customizations
+diff ~/.factory/settings.json ~/.factory/settings.json.example
 ```
 
-Droids, commands, and skills are symlinked and auto-propagate via `git pull`.
+Apply any new allowlist rules or defaults manually. Since `~/.factory` is a symlink to the repo dir, `git pull` propagates all droid, command, and skill changes automatically — only settings stay local.
 
 ## No Skill Auto-Application by File Path
 
@@ -142,15 +145,15 @@ This way `.droid.yaml` provides the auto-application that skills alone don't.
 
 ## Session Logs Are Separate
 
-**Decision**: Droid uses `~/.factory/logs/` instead of sharing `.claude/session-logs/`.
+**Decision**: Droid uses `.factory/logs/` (per-project) instead of sharing `.claude/session-logs/`.
 
-**Impact**: A handoff file created in Claude Code (`~/.factory/logs/handoff-*.md` vs `.claude/session-logs/handoff-*.md`) won't automatically be found by the other tool.
+**Impact**: A handoff file created in Claude Code (`.claude/session-logs/handoff-*.md`) won't automatically be found by Droid.
 
-**Workaround**: The `session-init` droid checks both locations:
+**Workaround**: The `lets-go` droid checks both locations:
 
 ```
-you> /session-init
-droid> Checking ~/.factory/logs/ for recent handoffs... none found.
+you> /lets-go
+droid> Checking .factory/logs/ for recent handoffs... none found.
        Checking .claude/session-logs/ for recent handoffs...
        Found: .claude/session-logs/handoff-2026-03-05-1430.md (from Claude Code)
        Loading context...

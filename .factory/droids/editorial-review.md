@@ -1,5 +1,5 @@
 ---
-name: "editorial"
+name: "editorial-review"
 description: "Audit prose for AI tells and refine voice/tone. Accepts optional style parameter."
 model: "claude-opus-4-6"
 tools: ["read", "edit", "web"]
