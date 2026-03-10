@@ -1,21 +1,98 @@
 ---
 name: "autocommit"
-description: "AI-powered conventional commit message generation"
+description: "Stage changed files and commit with an AI-generated conventional commit message"
+argument-hint: "[-n to confirm before committing] [-t type to suggest commit type] [-all to include untracked files]"
 ---
 
-# Auto Commit
+Stage tracked changes and commit with a generated conventional commit message.
 
-Generate and apply a conventional commit message based on staged or unstaged changes.
+Arguments: $ARGUMENTS
 
-## Steps
+## Step 1 — Check what's staged
 
-1. Run `git status --porcelain` to see what changed
-2. If no changes, report "Nothing to commit" and exit
-3. Analyze the changes and generate a commit message following Conventional Commits:
-   - Format: `<type>[optional scope]: <description>`
-   - Types: feat, fix, docs, style, refactor, perf, test, build, ci, chore, revert
-   - Keep subject line under 72 characters
-   - Use present tense and imperative mood
-4. Show the proposed commit message to the user
-5. Ask for confirmation before committing
-6. If confirmed: `git add . && git commit -m "<message>"`
+```bash
+git diff --cached --name-only
+```
+
+**If files are already staged:** skip Step 2 and go directly to Step 3.
+
+**If nothing is staged:** check for unstaged changes:
+
+```bash
+git status --porcelain
+```
+
+If nothing is staged AND the working tree is clean, report:
+> "Nothing to commit. Working tree is clean."
+and stop.
+
+## Step 2 — Stage changes (only when nothing was pre-staged)
+
+Show the user a summary of what will be staged:
+
+```text
+Files to be staged (tracked changes):
+  M  src/foo.ts
+  M  src/bar.ts
+```
+
+If `-all` was passed, also include untracked files in the summary and stage them too:
+
+```text
+New files to be staged (-all):
+  ?? new-file.ts
+```
+
+If `-all` was NOT passed and there are untracked files, list them separately as skipped:
+
+```text
+Untracked files (skipped — use -all to include them):
+  ?? new-file.ts
+```
+
+Then stage. Without `-all` use `git add -u` (tracked modifications and deletions only). With `-all` use `git add -A` (everything, including untracked files).
+
+Stage immediately unless `-n` was passed, in which case ask "Stage these files and generate commit message? (y/n)" and stop if "n".
+
+## Step 3 — Read the diff for context
+
+```bash
+git diff --cached
+```
+
+Use this to understand what actually changed, not just file names.
+
+## Step 4 — Generate the commit message
+
+Follow the conventional commits guideline. The format is:
+
+```text
+<type>[optional scope]: <description>
+
+[optional body]
+
+[optional footer(s)]
+```
+
+- Subject line: under 72 characters, present tense, imperative mood, no trailing period
+- Types: feat, fix, docs, style, refactor, perf, test, build, ci, chore, revert
+- If `-t <type>` was passed in arguments, use that type
+- Include a body only if the why isn't obvious from the subject
+- Add `BREAKING CHANGE:` footer if applicable
+
+## Step 5 — Show and commit
+
+Display the proposed message clearly. Commit immediately unless `-n` was passed, in which case ask "Commit with this message? (y/n)" and stop if "n" (changes remain staged).
+
+Commit using a heredoc to preserve formatting:
+
+```bash
+git commit -m "$(cat <<'EOF'
+<subject>
+
+<body>
+EOF
+)"
+```
+
+Report success or failure.

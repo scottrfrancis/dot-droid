@@ -11,9 +11,9 @@ This repository contains portable Factory.AI Droid configuration files — the D
 - `.factory/` — The deliverable: symlinked to `~/.factory/` on install
   - `settings.json.example` — Model, autonomy, allowlists/denylists template (gitignored locally)
   - `mcp.json.example` — MCP server integrations template (gitignored locally)
-  - `droids/` — Custom subagents (lets-go, arch-review, etc.)
+  - `droids/` — Custom subagents (lets-go, arch-review, doc-review, extract-adr, etc.)
   - `commands/` — Slash commands (autocommit, commit-manual, etc.)
-  - `skills/` — Reusable skill packages (shell-scripts, conventional-commits, etc.)
+  - `skills/` — Reusable skill packages (shell-scripts, conventional-commits, prose-style, prototype-hygiene, security-hardening, etc.)
 - `project/` — Per-project template (.droid.yaml + .factory/)
 - `workflows/` — GitHub Actions templates for Droid automation
 - `install.sh` — Installer for global and project config
