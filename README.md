@@ -105,6 +105,8 @@ Droids are the Droid equivalent of Claude Code's `/slash-commands` for complex, 
 | `arch-review` | Full architecture review (Well-Architected, SOLID, security, AI patterns) |
 | `editorial-review` | Audits prose for AI tells; accepts style parameter |
 | `security-audit` | Breach-driven security audit of web applications |
+| `review-pr` | PR code review: bugs, security, missing tests, style |
+| `babysit-pr` | Monitor a PR for checks, reviews, and merge readiness |
 
 #### Concrete examples
 
@@ -263,6 +265,7 @@ Skills are the Droid equivalent of `~/.claude/guidelines/`. They're reusable kno
 | `shell-escaping` | Complex shell commands, Docker invocations, CI scripts |
 | `c4-diagramming` | PlantUML architecture diagrams |
 | `markdown-formatting` | Any markdown content generation |
+| `testing` | Writing or reviewing tests (`*.test.*`, `*.spec.*`, test directories) |
 
 #### Concrete examples
 
