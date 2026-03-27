@@ -43,3 +43,9 @@ Mergeable: <yes/no/conflicting>
 - **Review requested/changes requested**: Summarize reviewer comments
 - **Merge conflicts**: Report and suggest resolution
 - **Still pending**: Report what's still running
+- **Merged**: Offer cleanup — switch to main, pull, delete the local branch, prune stale remote refs:
+  ```bash
+  git checkout main && git pull origin main && git branch -d <branch> && git fetch --prune
+  ```
+  Report what was cleaned up.
+- **Closed (not merged)**: Note it was closed without merging, offer to delete the local branch.

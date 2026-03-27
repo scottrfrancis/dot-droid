@@ -93,7 +93,7 @@ Open `~/.factory/settings.json` and adjust:
 ./install.sh /path/to/your/project
 ```
 
-This copies `.droid.yaml` into the project root and creates a local `.factory/` overlay for project-specific droid overrides and session logs. The logs directory (`.factory/logs/`) is gitignored.
+This copies `.droid.yaml` into the project root and creates a local `.factory/` overlay for project-specific droid overrides. Session logs are written to `session-logs/` at the project root — a shared location used by Cursor, Droid, Copilot, and Claude Code. The legacy `.factory/logs/` path is checked as a fallback. Both directories are gitignored.
 
 ---
 

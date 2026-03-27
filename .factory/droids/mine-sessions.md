@@ -11,7 +11,13 @@ Analyze session logs to extract patterns, quantitative metrics, and actionable f
 
 ## Step 1: Gather Data
 
-Read all `.md` files in `.factory/logs/` modified within the last 30 days. Use file timestamps and `**Date**:` frontmatter. Count total sessions, list topics by filename keywords.
+Read all `.md` files modified within the last 30 days from these locations (check all, merge results):
+
+1. `session-logs/` (shared cross-tool location)
+2. `.factory/logs/` (Droid legacy location)
+3. `.claude/session-logs/` (Claude Code / Copilot legacy location)
+
+If files have YAML frontmatter with a `tool:` field, track which tool generated each log — this enables per-tool metrics. Use file timestamps and `**Date**:` frontmatter. Count total sessions, list topics by filename keywords.
 
 ## Step 2: Session Metrics
 
@@ -30,19 +36,32 @@ Extract from session logs:
 - Decisions that were later revisited or contradicted
 - Recurring process friction points from "Session Effectiveness" sections
 
-## Step 4: Actionable Recommendations
+## Step 4: Guideline Coverage Gap
+
+If `docs/guidelines/` exists, read all guideline files to know the current rule set.
+
+Cross-reference each "Reusable Insight" and "Reinforced Pattern" from Step 3 against the guidelines:
+
+- If an insight appears in 2+ sessions but is NOT in any guideline file → **flag as candidate rule** with the recommended guideline file to add it to
+- If an insight IS already in a guideline file → note as "already codified"
+- If a decision appears significant but isn't in `docs/adr/` → **flag as ADR candidate**
+
+This is the highest-value output — it closes the loop between daily session work and the project's accumulated rules.
+
+## Step 5: Actionable Recommendations
 
 Based on all analysis, generate prioritized recommendations:
 
-1. **Pattern codification** — if a pattern appears in 3+ sessions but isn't documented in memory files, recommend adding it
-2. **Process gaps** — session logs mentioning the same problem repeatedly without a fix
-3. **Guideline updates** — newly discovered practices that should become standards
-4. **Tool or skill opportunities** — repetitive tasks that could be automated with a new command or droid
-5. **Session effectiveness trends** — are blockers becoming more or less frequent? Are goals being achieved?
+1. **Guideline gaps** — insights that should be added to `docs/guidelines/` (from Step 4)
+2. **ADR candidates** — decisions that should be formalized in `docs/adr/`
+3. **Pattern codification** — if a pattern appears in 3+ sessions but isn't documented anywhere, recommend where to add it
+4. **Process gaps** — session logs mentioning the same problem repeatedly without a fix
+5. **Tool or skill opportunities** — repetitive tasks that could be automated with a new command or droid
+6. **Session effectiveness trends** — are blockers becoming more or less frequent? Are goals being achieved?
 
 ## Step 5: Output
 
-Present the report with clear section headers and tables. Optionally save to `.factory/logs/mine-report-YYYY-MM-DD.md`.
+Present the report with clear section headers and tables. Optionally save to `session-logs/mine-report-YYYY-MM-DD.md` (fallback: `.factory/logs/mine-report-YYYY-MM-DD.md`).
 
 ## Rules
 

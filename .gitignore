@@ -3,6 +3,22 @@
 .factory/mcp.json
 .factory/logs/
 
+# Runtime data (machine-local, not part of template)
+.factory/auth.v2.file
+.factory/auth.v2.key
+.factory/background-processes.json
+.factory/background-tasks.json
+.factory/bin/
+.factory/cache/
+.factory/certs/
+.factory/history.json
+.factory/plugins/
+.factory/sessions/
+.factory/snapshots/
+.factory/sounds/
+.factory/specs/
+.factory/artifacts/
+
 # Session artifacts
 .claude/session-logs/
 .claude/session-env/

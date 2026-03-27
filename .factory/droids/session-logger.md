@@ -7,14 +7,14 @@ tools: ["read", "execute", "edit"]
 
 # Session Logger
 
-Create a comprehensive session summary and save it to `.factory/logs/` with proper organization.
+Create a comprehensive session summary and save it to the shared cross-tool session logs directory.
 
 ## Setup
 
-Create the logs directory if it doesn't exist:
+Create the logs directory if it doesn't exist. Prefer `session-logs/` (shared cross-tool location); fall back to `.factory/logs/` if creation fails:
 
 ```bash
-mkdir -p .factory/logs
+mkdir -p session-logs 2>/dev/null || mkdir -p .factory/logs
 ```
 
 ## Gather Context
@@ -23,7 +23,7 @@ Review the conversation history to identify what was accomplished. Also check gi
 
 ## Link to Previous Session
 
-Find the most recent session log in `.factory/logs/` (excluding `mine-report-*` and `handoff-*` files). If found, add to the header:
+Find the most recent session log in `session-logs/` (then `.factory/logs/` as fallback), excluding `mine-report-*` and `handoff-*` files. If found, add to the header:
 
 ```markdown
 **Previous Session**: [filename](filename) — [one-line summary from that log's Summary section]
@@ -33,9 +33,19 @@ This creates a browsable chain across sessions. If no previous session log exist
 
 ## Generate Session Summary
 
-Save to: `.factory/logs/YYYY-MM-DD-HHMM[-topic].md`
+Save to: `session-logs/session-YYYY-MM-DD-HHMM[-topic].md` (or `.factory/logs/` if `session-logs/` is unavailable).
 
 ### Required Sections
+
+#### YAML Frontmatter (required for cross-tool compatibility)
+
+```markdown
+---
+tool: droid
+timestamp: YYYY-MM-DDTHH:MM:SS-TZ
+branch: <current branch from git>
+---
+```
 
 #### Header
 
