@@ -3,21 +3,29 @@
 .factory/mcp.json
 .factory/logs/
 
-# Runtime data (machine-local, not part of template)
+# Auth / credentials (NEVER commit)
 .factory/auth.v2.file
 .factory/auth.v2.key
+.factory/auth.v2.*
+.factory/certs/
+
+# Runtime state
+.factory/history.json
+.factory/token-ledger.json
 .factory/background-processes.json
 .factory/background-tasks.json
-.factory/bin/
+.factory/artifacts/
 .factory/cache/
-.factory/certs/
-.factory/history.json
-.factory/plugins/
 .factory/sessions/
 .factory/snapshots/
+
+# App-bundled / machine-local
 .factory/sounds/
+.factory/plugins/
+.factory/bin/
+
+# Local planning specs (not shared)
 .factory/specs/
-.factory/artifacts/
 
 # Session artifacts
 .claude/session-logs/
