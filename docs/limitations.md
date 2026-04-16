@@ -143,20 +143,17 @@ guidelines:
 
 This way `.droid.yaml` provides the auto-application that skills alone don't.
 
-## Session Logs Are Separate
+## Session Logs Are Shared (Resolved)
 
-**Decision**: Droid uses `.factory/logs/` (per-project) instead of sharing `.claude/session-logs/`.
+**Previous state**: Droid used `.factory/logs/` while Claude Code and Copilot used `.claude/session-logs/`. A handoff created in one tool wasn't automatically found by another.
 
-**Impact**: A handoff file created in Claude Code (`.claude/session-logs/handoff-*.md`) won't automatically be found by Droid.
-
-**Workaround**: The `lets-go` droid checks both locations:
+**Current state**: All tools now write to `session-logs/` at the project root with YAML frontmatter identifying the source tool (`tool: droid`, `tool: cursor`, `tool: copilot`, `tool: claude-code`). All tools' `lets-go` and `pickup` commands search `session-logs/` first, then fall back to legacy locations (`.factory/logs/`, `.claude/session-logs/`) for backwards compatibility.
 
 ```
 you> /lets-go
-droid> Checking .factory/logs/ for recent handoffs... none found.
-       Checking .claude/session-logs/ for recent handoffs...
-       Found: .claude/session-logs/handoff-2026-03-05-1430.md (from Claude Code)
+droid> Checking session-logs/ for recent handoffs...
+       Found: session-logs/handoff-2026-03-25-1430.md (from Cursor session)
        Loading context...
 ```
 
-If you switch tools frequently, you could symlink one directory to the other, but the current design keeps them separate to avoid conflicts.
+The `tool:` field in the YAML frontmatter lets the receiving tool set expectations about what context the previous session had access to (e.g., Droid has ADO MCP, Cursor has GitHub CLI, Copilot has different model access).

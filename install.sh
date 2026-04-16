@@ -177,7 +177,14 @@ fi
 mkdir -p "${TARGET_DIR}/.factory/logs"
 if [[ ! -e "${TARGET_DIR}/.factory/logs/.gitignore" ]]; then
   printf '*\n!.gitignore\n' > "${TARGET_DIR}/.factory/logs/.gitignore"
-  echo "  [create] .factory/logs/.gitignore"
+  echo "  [create] .factory/logs/.gitignore (legacy location)"
+fi
+
+# Shared cross-tool session logs directory
+mkdir -p "${TARGET_DIR}/session-logs"
+if [[ ! -e "${TARGET_DIR}/session-logs/.gitkeep" ]]; then
+  touch "${TARGET_DIR}/session-logs/.gitkeep"
+  echo "  [create] session-logs/.gitkeep (shared cross-tool location)"
 fi
 
 echo ""
@@ -186,7 +193,8 @@ echo ""
 echo "Installed components:"
 echo "  .droid.yaml               — PR review configuration"
 echo "  .factory/droids/          — Project-local droid overrides (empty)"
-echo "  .factory/logs/            — Session logs (gitignored)"
+echo "  session-logs/             — Shared cross-tool session logs (primary)"
+echo "  .factory/logs/            — Droid legacy session logs (fallback)"
 echo ""
 echo "Add project-specific droids to .factory/droids/ to override"
 echo "or extend the global configuration."

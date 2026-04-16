@@ -11,12 +11,13 @@ Resume work after a context clear. Load the most recent handoff and continue whe
 
 ## Find Handoff
 
-Search for the most recent `handoff-*.md` file:
+Search for the most recent `handoff-*.md` file across all tool locations:
 
-1. Check `.factory/logs/` (project-local)
-2. Then `.claude/session-logs/` (Claude Code cross-tool)
+1. Check `session-logs/` (shared cross-tool location)
+2. Then `.factory/logs/` (Droid legacy location)
+3. Then `.claude/session-logs/` (Claude Code / Copilot location)
 
-Take the most recently modified file across both locations.
+Take the most recently modified file across all locations.
 
 **If none found, or the file is older than 7 days**: Stop and tell the user:
 
@@ -26,14 +27,14 @@ No recent handoff found. Try /lets-go for a full session start instead.
 
 ## Load Context
 
-Read the handoff file in full. The contents become the active session context.
+Read the handoff file in full. If the file has YAML frontmatter with a `tool:` field, note which tool created it (e.g., "Picking up from a Cursor session" or "Last session was in Droid"). The contents become the active session context.
 
 ## Output
 
 Report back concisely:
 
 ```
-Picked up: [filename]
+Picked up: [filename] (from [tool name] session)
 
 Continuing: [one-line summary of what was in-progress, from the handoff]
 

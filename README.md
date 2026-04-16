@@ -51,7 +51,7 @@ Inside that directory:
 ├── droids/             # Committed — live via symlink
 ├── commands/           # Committed — live via symlink
 ├── skills/             # Committed — live via symlink
-└── logs/               # Gitignored — global checkpoint logs
+└── logs/               # LEGACY FALLBACK — session logs now go to project-root session-logs/
 ```
 
 **Why this structure?** `~/.factory` is a single symlink to the repo's `.factory/` directory. All droids, commands, and skills are live immediately — `git pull` propagates changes everywhere. `settings.json` and `mcp.json` are gitignored so machine-specific config (model preferences, MCP server paths) stays local.
@@ -99,9 +99,9 @@ Droids are the Droid equivalent of Claude Code's `/slash-commands` for complex, 
 |---|---|
 | `lets-go` | Fresh session start: git sync, project docs review, status report |
 | `pickup` | Resume after context clear: loads most recent handoff, nothing else |
-| `session-logger` | Creates session summary in `.factory/logs/YYYY-MM-DD-HHMM.md` |
-| `handoff` | Generates continuation prompt in `.factory/logs/handoff-YYYY-MM-DD-HHMM.md` |
-| `mine-sessions` | Analyzes `.factory/logs/` for patterns and metrics |
+| `session-logger` | Creates session summary in `session-logs/YYYY-MM-DD-HHMM.md` |
+| `handoff` | Generates continuation prompt in `session-logs/handoff-YYYY-MM-DD-HHMM.md` |
+| `mine-sessions` | Analyzes `session-logs/` for patterns and metrics |
 | `arch-review` | Full architecture review (Well-Architected, SOLID, security, AI patterns) |
 | `editorial-review` | Audits prose for AI tells; accepts style parameter |
 | `security-audit` | Breach-driven security audit of web applications |
@@ -115,7 +115,7 @@ Droids are the Droid equivalent of Claude Code's `/slash-commands` for complex, 
 ```
 you> /lets-go
 droid> Checking for recent handoff files...
-       Found: .factory/logs/handoff-2026-03-05-1430.md
+       Found: session-logs/handoff-2026-03-05-1430.md
        Loading context from previous session...
 
        Running git sync...
@@ -134,7 +134,7 @@ droid> Checking for recent handoff files...
 
 ```
 you> /pickup
-droid> Picked up: .factory/logs/handoff-2026-03-06-1430.md
+droid> Picked up: session-logs/handoff-2026-03-06-1430.md
 
        Continuing: tenant isolation tests for the auth middleware refactor
 
@@ -145,11 +145,11 @@ droid> Picked up: .factory/logs/handoff-2026-03-06-1430.md
 
 ```
 you> /session-logger
-droid> Session log saved to .factory/logs/2026-03-06-1700-auth-hardening.md
+droid> Session log saved to session-logs/2026-03-06-1700-auth-hardening.md
        Reminder: You changed 8 files this session. Run /handoff before closing.
 
 you> /handoff
-droid> Continuation prompt saved to .factory/logs/handoff-2026-03-06-1705.md
+droid> Continuation prompt saved to session-logs/handoff-2026-03-06-1705.md
 ```
 
 **Running an architecture review**:
@@ -388,11 +388,11 @@ droid> [loads handoff, syncs git, reports status, suggests next steps]
 you> [... do your work ...]
 
 you> /session-logger
-droid> [saves summary to .factory/logs/2026-03-06-1700-topic.md]
+droid> [saves summary to session-logs/2026-03-06-1700-topic.md]
        Reminder: Run /handoff if you're stopping for the day.
 
 you> /handoff
-droid> [saves continuation prompt to .factory/logs/handoff-2026-03-06-1705.md]
+droid> [saves continuation prompt to session-logs/handoff-2026-03-06-1705.md]
 ```
 
 ## Overriding Configuration

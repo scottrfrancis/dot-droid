@@ -143,8 +143,10 @@ To customize the `arch-review` droid for one project:
 
 | Aspect | Claude Code | Copilot | Droid |
 |---|---|---|---|
-| Log directory | `.claude/session-logs/` | `.claude/session-logs/` (shared) | `.factory/logs/` (per-project) |
-| Handoff format | `handoff-YYYY-MM-DD-HHMM.md` | Same | Same |
+| Log directory | `session-logs/` (shared) | `session-logs/` (shared) | `session-logs/` (shared) |
+| Legacy log directory | `.claude/session-logs/` | `.claude/session-logs/` | `.factory/logs/` |
+| Handoff format | `handoff-YYYY-MM-DD-HHMM.md` with YAML frontmatter (`tool: claude-code`) | Same (`tool: copilot`) | Same (`tool: droid`) |
+| Handoff discovery | `session-logs/` → `.claude/session-logs/` | `session-logs/` → `.claude/session-logs/` → `.factory/logs/` | `session-logs/` → `.factory/logs/` → `.claude/session-logs/` |
 | Auto-memory | `~/.claude/projects/*/memory/` | No equivalent | No equivalent |
 | Plan mode | Built-in (enforced read-only) | No equivalent | No equivalent |
-| Cross-tool handoff | N/A | Reads `.claude/session-logs/` | `lets-go` checks both `.factory/logs/` and `.claude/session-logs/` |
+| Cross-tool handoff | All tools write to `session-logs/` with YAML frontmatter identifying the source tool. Any tool's `/pickup` or `/lets-go` finds handoffs from any other tool. | Same | Same |
