@@ -36,6 +36,50 @@ Review the project documentation including:
 
 ## Git Sync Protocol
 
+### Dot-Repo Sync Check (dot-droid / `~/.factory`)
+
+Run this first, before project-repo checks. Verify the dot-droid config repo (the parent of `~/.factory`'s symlink target) is in sync with its GitHub origin.
+
+1. **Locate the dot-droid clone** — `~/.factory` is a symlink to `<repo>/.factory/`, so the repo is the parent of the symlink target:
+
+   ```bash
+   DOT_DROID=""
+   if [[ -L "$HOME/.factory" ]]; then
+     FACTORY_TARGET=$(readlink -f "$HOME/.factory" 2>/dev/null)
+     CANDIDATE="$(dirname "$FACTORY_TARGET")"
+     [[ -d "$CANDIDATE/.git" ]] && DOT_DROID="$CANDIDATE"
+   elif [[ -d "$HOME/.factory/.git" ]]; then
+     DOT_DROID="$HOME/.factory"
+   fi
+   ```
+
+2. **If located**, run the drift check:
+
+   ```bash
+   git -C "$DOT_DROID" fetch origin
+   git -C "$DOT_DROID" rev-list --count HEAD..origin/main   # behind
+   git -C "$DOT_DROID" rev-list --count origin/main..HEAD   # ahead
+   git -C "$DOT_DROID" status --porcelain
+   ```
+
+3. **Alert the user prominently** if out of sync:
+
+   - **Behind**: "⚠ dot-droid is {N} commits behind origin — your droids/skills/commands may be stale. Consider `git -C $DOT_DROID pull`."
+   - **Ahead**: "dot-droid has {N} unpushed commits — consider pushing to back up your config."
+   - **Dirty**: "dot-droid has uncommitted changes."
+
+4. **If not located**, skip silently — `~/.factory` may not be symlinked to a git repo.
+
+### Other Dot-Repos (Opportunistic)
+
+The user may run sessions from other tools (Claude Code, Copilot, Cursor) on this machine. If any of those dot-repos are discoverable, run the same `fetch / rev-list / status` pattern against them and report drift with the same behind/ahead/dirty wording. **Skip silently for any repo not installed on this machine** — do not emit errors.
+
+- **dot-claude**: check only if `$HOME/.claude/.git` exists.
+- **dot-copilot**: check only if a `.github/copilot-instructions.md` (or any `.github/instructions/*.instructions.md`) symlink exists in the current project. Resolve it and walk up until `.git` is found.
+- **dot-cursor**: check only if `$DOT_CURSOR_DIR` is set, or if any of `$HOME/workspace/dot-cursor`, `$HOME/dot-cursor`, `/Volumes/workspace/dot-cursor` has a `.git` directory.
+
+### Project repo
+
 Run these checks in order:
 
 1. `git fetch origin` — update remote tracking refs

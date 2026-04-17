@@ -21,6 +21,31 @@ mkdir -p session-logs 2>/dev/null || mkdir -p .factory/logs
 
 Review the conversation history to identify what was accomplished. Also check git status and recent commits for file changes.
 
+## Dot-Repo Sync Check (dot-droid / `~/.factory`)
+
+As part of end-of-session hygiene, verify the dot-droid config repo is in sync with its GitHub origin. This is consistent with `/lets-go`, `/pickup`, and `/handoff`.
+
+1. **Locate the dot-droid clone**:
+
+   ```bash
+   DOT_DROID=""
+   if [[ -L "$HOME/.factory" ]]; then
+     FACTORY_TARGET=$(readlink -f "$HOME/.factory" 2>/dev/null)
+     CANDIDATE="$(dirname "$FACTORY_TARGET")"
+     [[ -d "$CANDIDATE/.git" ]] && DOT_DROID="$CANDIDATE"
+   elif [[ -d "$HOME/.factory/.git" ]]; then
+     DOT_DROID="$HOME/.factory"
+   fi
+   ```
+
+2. **If located**, run the drift check and alert prominently if out of sync. Note the state in the `## Session Effectiveness` section under `Process friction` if drift is detected:
+
+   - **Behind**: "⚠ dot-droid is {N} commits behind origin — your droids/skills/commands may be stale. Consider `git -C $DOT_DROID pull`."
+   - **Ahead**: "dot-droid has {N} unpushed commits — consider pushing to back up your config."
+   - **Dirty**: "dot-droid has uncommitted changes."
+
+3. **If not located**, skip silently.
+
 ## Link to Previous Session
 
 Find the most recent session log in `session-logs/` (then `.factory/logs/` as fallback), excluding `mine-report-*` and `handoff-*` files. If found, add to the header:

@@ -13,6 +13,12 @@ reviews:
 
   # File-specific review instructions
   guidelines:
+    # Red-Green-Refactor TDD is REQUIRED for ALL code changes.
+    # Enforce it at review time: flag any production-code change that lacks a
+    # corresponding new/modified test, or where the test was clearly added
+    # retroactively (after the production code in the same PR).
+    - path: "**/*"
+      instructions: "Enforce Red-Green-Refactor TDD: every production-code change MUST be accompanied by a new or modified test that exercises the change. Flag any production-code diff without a matching test change as a TDD violation. Flag retroactive tests (tests clearly written after the production code) as a TDD violation. Narrow exceptions: pure config changes, generated code (protobuf/ORM/lockfiles), and explicitly labeled throwaway spikes."
     - path: "**/*.sh"
       instructions: "Check for set -euo pipefail, SCRIPT_DIR detection, proper quoting, cleanup traps, and portability."
     - path: "**/*.md"

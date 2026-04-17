@@ -1,9 +1,38 @@
 ---
 name: "testing"
-description: "Testing strategies: test pyramid, mocking, CI integration, framework-specific notes"
+description: "Testing strategies: TDD (required), test pyramid, mocking, CI integration, framework-specific notes"
 ---
 
 # Testing Strategies
+
+## Red-Green-Refactor TDD (REQUIRED — ALWAYS)
+
+**Red-Green-Refactor TDD is mandatory for every code change.** No production code is written without a failing test first. This applies to bug fixes, new features, and refactors alike. There is no "I'll add tests later." Tests come first, always.
+
+The cycle — repeat for every behavior:
+
+1. **🔴 RED** — Write a failing test that expresses the desired behavior. Run it and confirm it fails for the right reason (the behavior is missing, not a typo/compile error). Do NOT write production code yet.
+2. **🟢 GREEN** — Write the minimum production code needed to make the failing test pass. Resist adding logic the current test doesn't require.
+3. **🔵 REFACTOR** — With all tests green, clean up the code: remove duplication, improve names, clarify structure. Tests stay green throughout.
+
+### Non-negotiable rules
+
+- **Never** write production code without a corresponding failing test first.
+- **Never** write more than one failing test at a time.
+- **Never** add production logic beyond what the currently-failing test demands.
+- **Always** run the test between RED and GREEN to verify it actually fails for the right reason.
+- **Always** keep cycles short — minutes, not hours.
+- **No retroactive tests.** Tests added after the production code they exercise do not count as TDD and must be flagged in review.
+
+### Narrow exceptions
+
+The only acceptable reasons to write code before a test:
+
+- **Spikes** — throwaway exploratory code in `/tmp` or a scratch branch. Production code derived from a spike must be re-built via TDD.
+- **Pure config changes** — no behavior, no tests required.
+- **Generated code** — protobuf stubs, ORM migrations, lockfiles.
+
+If you think you have another exception, you do not. Write the test.
 
 ## Test Pyramid
 
