@@ -17,6 +17,31 @@ Generate a continuation prompt capturing current session state for the next sess
 4. Read any active TODO lists or plan files
 5. Check for recent session logs (`session-logs/` then `.factory/logs/`) for additional context
 
+## Dot-Repo Sync Check (dot-droid / `~/.factory`)
+
+Before generating the handoff, verify the dot-droid config repo is in sync with its GitHub origin. This is consistent with `/lets-go`, `/pickup`, and `/session-logger`.
+
+1. **Locate the dot-droid clone** — `~/.factory` is a symlink to `<repo>/.factory/`:
+
+   ```bash
+   DOT_DROID=""
+   if [[ -L "$HOME/.factory" ]]; then
+     FACTORY_TARGET=$(readlink -f "$HOME/.factory" 2>/dev/null)
+     CANDIDATE="$(dirname "$FACTORY_TARGET")"
+     [[ -d "$CANDIDATE/.git" ]] && DOT_DROID="$CANDIDATE"
+   elif [[ -d "$HOME/.factory/.git" ]]; then
+     DOT_DROID="$HOME/.factory"
+   fi
+   ```
+
+2. **If located**, run the drift check and alert prominently if out of sync. Note the state in the `## Blockers / Risks` section of the handoff if drift is detected:
+
+   - **Behind**: "⚠ dot-droid is {N} commits behind origin — your droids/skills/commands may be stale. Consider `git -C $DOT_DROID pull`."
+   - **Ahead**: "dot-droid has {N} unpushed commits — consider pushing to back up your config."
+   - **Dirty**: "dot-droid has uncommitted changes."
+
+3. **If not located**, skip silently.
+
 ## Generate Continuation Prompt
 
 Write to `session-logs/handoff-YYYY-MM-DD-HHMM.md` using the current date and time. If `session-logs/` does not exist, create it. If creation fails (e.g., permissions), fall back to `.factory/logs/`.

@@ -32,9 +32,12 @@ Each file maps to a Claude Code equivalent:
 
 ## Development Guidelines
 
-- Follow `~/.claude/guidelines/conventional-commits.md` for commit messages
-- Follow `~/.claude/guidelines/shell-scripts.md` for any bash scripts
-- When porting content from `~/.claude/`, preserve the intent while adapting to Droid's format
+This repository is standalone and **does not require Claude Code or `~/.claude/` to be installed**. All dev-workflow rules below have local copies in `.factory/skills/`. The `~/.claude/` paths are listed as optional fallbacks when Claude Code is available on the same machine.
+
+- **Red-Green-Refactor TDD is REQUIRED for ALL code changes.** Always write a failing test first (RED), then the minimum production code to pass (GREEN), then refactor with tests green. No production code without a failing test. No retroactive tests. See `.factory/skills/testing/SKILL.md` for the full cycle, non-negotiable rules, and the (narrow) exceptions.
+- Follow `.factory/skills/conventional-commits/SKILL.md` (fallback: `~/.claude/guidelines/conventional-commits.md`) for commit messages
+- Follow `.factory/skills/shell-scripts/SKILL.md` (fallback: `~/.claude/guidelines/shell-scripts.md`) for any bash scripts
+- When porting content from `~/.claude/` (only if installed), preserve the intent while adapting to Droid's format
 - Droids use YAML frontmatter with `name`, `description`, `model`, `tools`
 - Skills use YAML frontmatter with `name`, `description`
 
