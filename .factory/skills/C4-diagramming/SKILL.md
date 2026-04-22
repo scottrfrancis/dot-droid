@@ -1,5 +1,5 @@
 ---
-name: "c4-diagramming"
+name: "C4-diagramming"
 description: "C4 Model PlantUML organization for architecture diagrams"
 ---
 
