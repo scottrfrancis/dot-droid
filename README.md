@@ -254,18 +254,39 @@ Skills are the Droid equivalent of `~/.claude/guidelines/`. They're reusable kno
 
 **Reference**: [Skills docs](https://docs.factory.ai/cli/configuration/skills)
 
+**Behavior rules** (relevant almost always):
+
 | Skill | When It's Relevant |
 |---|---|
 | `conventional-commits` | Every git commit |
-| `shell-scripts` | Writing or editing `*.sh`, `*.bash`, `Makefile` |
+| `karpathy-principles` | Before implementing — surface assumptions, match style, mention don't delete dead code |
+| `prototype-hygiene` | Every change — config over code, docs describe current state, PRs over branches |
 | `session-safety` | Working on hardware systems with NPU/GPU devices |
+
+**Language/file-scoped**:
+
+| Skill | When It's Relevant |
+|---|---|
 | `ai-patterns` | Building LLM integrations (`*.py`, `*.ts` with AI/LLM imports) |
-| `readme-documentation` | Creating or updating `*.md` documentation |
-| `project-setup` | Bootstrapping a new project |
-| `shell-escaping` | Complex shell commands, Docker invocations, CI scripts |
-| `c4-diagramming` | PlantUML architecture diagrams |
+| `C4-diagramming` | PlantUML architecture diagrams |
+| `golang` | Writing or reviewing Go code (`*.go`, `go.mod`, `go.sum`) |
 | `markdown-formatting` | Any markdown content generation |
+| `prose-style` | Drafting narrative prose (blog posts, articles, essays) |
+| `readme-documentation` | Creating or updating `*.md` documentation |
+| `shell-escaping` | Complex shell commands, Docker invocations, CI scripts |
+| `shell-scripts` | Writing or editing `*.sh`, `*.bash`, `Makefile` |
 | `testing` | Writing or reviewing tests (`*.test.*`, `*.spec.*`, test directories) |
+
+**Workflow-scoped**:
+
+| Skill | When It's Relevant |
+|---|---|
+| `ci-local-parity` | Adding or modifying CI workflows |
+| `docx-conversion` | Generating DOCX from markdown (resumes, cover letters) |
+| `md2pdf` | Converting markdown to PDF |
+| `pr-token-tracking` | Opening a pull request |
+| `project-setup` | Bootstrapping a new project |
+| `security-hardening` | Auditing web applications, post-breach analysis |
 
 #### Concrete examples
 
@@ -456,6 +477,22 @@ Edit `~/.factory/mcp.json` to connect Droid to external tools. See the [MCP inte
 }
 ```
 
+## Self-contained by design
+
+`.factory/` contains all the droids, commands, and skills shipped by this repo. A Droid-only user can clone dot-droid and run `./install.sh --global` with no external dependencies — no `~/.claude/` checkout required. Because `~/.factory/` is a symlink to this repo's `.factory/`, `git pull` in dot-droid propagates updates to every linked project instantly.
+
+## Syncing edits from dot-claude
+
+If you author rule content in [`~/.claude/guidelines/`](https://github.com/scottrfrancis/dot-claude) and want to propagate edits into this repo's skills:
+
+```bash
+./bin/sync-from-dot-claude.sh --dry-run   # preview which skills would change
+./bin/sync-from-dot-claude.sh             # apply — writes bodies into .factory/skills/*/SKILL.md
+git diff .factory/skills/                 # review before committing
+```
+
+The sync script preserves each skill's existing frontmatter (`name:` and `description:`) and replaces only the body. New guidelines with no matching skill directory are reported as warnings; create `.factory/skills/<name>/SKILL.md` manually first with appropriate frontmatter before re-running.
+
 ## Directory Structure
 
 ```
@@ -464,6 +501,8 @@ dot-droid/
 ├── CLAUDE.md                              # For working on this repo with Claude Code
 ├── install.sh                             # Global and project installer
 ├── .gitignore
+├── bin/
+│   └── sync-from-dot-claude.sh            # Propagate ~/.claude/guidelines/ edits to skills
 │
 ├── .factory/                              # THE DELIVERABLE — symlinked to ~/.factory/
 │   ├── settings.json.example              # Model, autonomy, allowlists (template)
@@ -483,16 +522,26 @@ dot-droid/
 │   │   ├── checkpoint-progress            # bash
 │   │   ├── session-cleanup                # bash
 │   │   └── validate-hw-env               # bash
-│   └── skills/                            # 9 reusable skill packages
-│       ├── shell-scripts/SKILL.md
-│       ├── conventional-commits/SKILL.md
-│       ├── readme-documentation/SKILL.md
-│       ├── session-safety/SKILL.md
+│   └── skills/                            # 19 reusable skill packages
 │       ├── ai-patterns/SKILL.md
+│       ├── C4-diagramming/SKILL.md
+│       ├── ci-local-parity/SKILL.md
+│       ├── conventional-commits/SKILL.md
+│       ├── docx-conversion/SKILL.md
+│       ├── golang/SKILL.md
+│       ├── karpathy-principles/SKILL.md
+│       ├── markdown-formatting/SKILL.md
+│       ├── md2pdf/SKILL.md
+│       ├── pr-token-tracking/SKILL.md
 │       ├── project-setup/SKILL.md
+│       ├── prose-style/SKILL.md
+│       ├── prototype-hygiene/SKILL.md
+│       ├── readme-documentation/SKILL.md
+│       ├── security-hardening/SKILL.md
+│       ├── session-safety/SKILL.md
 │       ├── shell-escaping/SKILL.md
-│       ├── c4-diagramming/SKILL.md
-│       └── markdown-formatting/SKILL.md
+│       ├── shell-scripts/SKILL.md
+│       └── testing/SKILL.md
 │
 ├── project/                               # Per-project template
 │   ├── .droid.yaml                        # PR review config
