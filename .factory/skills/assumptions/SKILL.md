@@ -78,19 +78,19 @@ Scan existing assumptions for:
 
 ## Example
 
-Input: `/assumptions MDP data latency is under 10 seconds`
+Input: `/assumptions the third-party pricing API responds in under 200ms at p95`
 
 Output appended to tracker:
 
 ```markdown
-### A06: MDP Data Latency <10 Seconds
+### A06: Pricing API Latency <200ms p95
 
-**Hypothesis**: The Modern Data Platform receives alarm data from SCADA with less than 10-second end-to-end latency.
+**Hypothesis**: The third-party pricing API returns results in under 200ms at the 95th percentile under expected load.
 **Validation Status**: PENDING
-**Validation Method**: Query MDP with timestamp comparison against SCADA source; schedule meeting with MDP team lead
-**Impact if TRUE**: Application polls MDP every 5-15 seconds; L4 deployment with ICSR Lite approval (2-4 weeks)
-**Impact if FALSE**: Application requires L3 deployment with direct MQTT subscription; ICSR Full approval (2-3 months); timeline extends 8+ weeks
-**Fallback**: Use SACS database as intermediate source, or demo-only mode with synthetic data
+**Validation Method**: Load-test the endpoint at target RPS; compare against the vendor SLA; confirm with a timed sample over 24h.
+**Impact if TRUE**: Synchronous pricing at request time; no caching layer needed for v1.
+**Impact if FALSE**: Requires a cache + async refresh; adds a background job and cache-invalidation design; timeline extends.
+**Fallback**: Ship with a short-TTL cache and a "prices as of HH:MM" disclaimer.
 **Severity**: CRITICAL
 **Owner**: TBD
 **Due Date**: TBD

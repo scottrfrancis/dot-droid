@@ -28,9 +28,9 @@ Read existing feature files to establish patterns. Check these locations in orde
 
 From existing files, extract:
 - **Tag patterns**: `@fr-###`, `@mvp`, `@future-*`, `@draft`, milestone tags
-- **Persona names**: Used in Given steps (e.g., "the Vantage Operator", "the Field Operator")
-- **Domain vocabulary**: Consistent terminology for When/Then steps
-- **Background patterns**: Common preconditions used across features
+- **Persona names**: used in Given steps (e.g. "the Operator", "the Reviewer")
+- **Domain vocabulary**: consistent terminology for When/Then steps
+- **Background patterns**: common preconditions used across features
 
 If no existing feature files are found, use generic BDD conventions.
 
@@ -83,16 +83,16 @@ Write steps that describe WHAT happens, not HOW:
 
 **Good**:
 ```gherkin
-Given the operator is viewing the alarm dashboard
-When a flood event with 47 alarms is detected
-Then the alarms are grouped into a single event card
+Given the analyst is viewing the reports dashboard
+When they request a CSV export of the current view
+Then the report is downloaded with all visible columns
 ```
 
 **Bad**:
 ```gherkin
 Given the user opens Chrome and navigates to localhost:3001
-When the user clicks the refresh button
-Then the user sees a card element with class "event-card"
+When the user clicks the button with id "export-btn"
+Then a file appears in the Downloads folder
 ```
 
 ### 6. Place the output
@@ -114,12 +114,12 @@ After generating, confirm:
 ## Example Invocation
 
 ```
-/gherkin FR-5.14: Event detail panel shows alarm count by type with severity breakdown
+/gherkin FR-5.14: the report detail panel shows record counts by type with a status breakdown
 ```
 
 Or:
 
 ```
-/gherkin When a power failure cascade occurs, operators need to see all 47 alarms
-grouped into a single event with root cause hypothesis and recommended actions
+/gherkin When a batch import partially fails, the operator needs to see which rows
+were rejected, grouped by error type, with a suggested fix for each
 ```
