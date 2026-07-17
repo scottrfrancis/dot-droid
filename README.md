@@ -300,8 +300,9 @@ Skills are the Droid equivalent of `~/.claude/guidelines/`. They're reusable kno
 | `constitution` | Generate CONSTITUTION.md / WORKFLOWS.md — principles, Definition of Done, quality gates (`/constitution`) |
 | `assumptions` | Track hypothesis-driven assumptions (if-true/if-false/fallback) → ASSUMPTIONS-TRACKER.md (`/assumptions`) |
 | `gherkin` | Draft Gherkin acceptance scenarios from a requirement or FR-### (`/gherkin`) |
+| `adr` | Canonical ADR format — `docs/decisions/ADR-NNNN-slug.md`, numbering, status lifecycle, FR-### traceability (`/adr`) |
 
-Paired discovery/design droids: `discovery-init` (scaffold an SDD project), `interview-to-spec` (notes → requirements + Gherkin + tracker), `design-review` (D2.x consistency + traceability), `trace-check` (bidirectional requirements↔tests coverage).
+Paired discovery/design droids: `discovery-init` (scaffold an SDD project), `interview-to-spec` (notes → requirements + Gherkin + tracker), `design-review` (D2.x consistency + traceability), `trace-check` (bidirectional requirements↔tests coverage). The `extract-adr` droid now writes to `docs/decisions/` with sequential numbering per the `adr` skill.
 
 #### Concrete examples
 
