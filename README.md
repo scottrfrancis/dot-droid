@@ -270,6 +270,10 @@ Skills are the Droid equivalent of `~/.claude/guidelines/`. They're reusable kno
 | `ai-patterns` | Building LLM integrations (`*.py`, `*.ts` with AI/LLM imports) |
 | `C4-diagramming` | PlantUML architecture diagrams |
 | `golang` | Writing or reviewing Go code (`*.go`, `go.mod`, `go.sum`) |
+| `python` | Writing or reviewing Python (`*.py`, `pyproject.toml`) |
+| `typescript` | Writing or reviewing TypeScript (`*.ts`, `*.tsx`) |
+| `docker` | Authoring/reviewing Dockerfiles and compose files |
+| `terraform` | Writing or reviewing Terraform (`*.tf`) |
 | `markdown-formatting` | Any markdown content generation |
 | `prose-style` | Drafting narrative prose (blog posts, articles, essays) |
 | `readme-documentation` | Creating or updating `*.md` documentation |
@@ -287,6 +291,18 @@ Skills are the Droid equivalent of `~/.claude/guidelines/`. They're reusable kno
 | `pr-token-tracking` | Opening a pull request |
 | `project-setup` | Bootstrapping a new project |
 | `security-hardening` | Auditing web applications, post-breach analysis |
+
+**Spec-Driven Development (SDLC)** — harvested from the airgapped engagement fork:
+
+| Skill | When It's Relevant |
+|---|---|
+| `git-workflow` | Branch + PR discipline for every change to `main`; stacked PRs |
+| `constitution` | Generate CONSTITUTION.md / WORKFLOWS.md — principles, Definition of Done, quality gates (`/constitution`) |
+| `assumptions` | Track hypothesis-driven assumptions (if-true/if-false/fallback) → ASSUMPTIONS-TRACKER.md (`/assumptions`) |
+| `gherkin` | Draft Gherkin acceptance scenarios from a requirement or FR-### (`/gherkin`) |
+| `adr` | Canonical ADR format — `docs/decisions/ADR-NNNN-slug.md`, numbering, status lifecycle, FR-### traceability (`/adr`) |
+
+Paired discovery/design droids: `discovery-init` (scaffold an SDD project), `interview-to-spec` (notes → requirements + Gherkin + tracker), `design-review` (D2.x consistency + traceability), `trace-check` (bidirectional requirements↔tests coverage). The `extract-adr` droid now writes to `docs/decisions/` with sequential numbering per the `adr` skill.
 
 #### Concrete examples
 
@@ -308,6 +324,16 @@ droid> feat(api): add tenant isolation check on /reports endpoint
 ### GitHub Actions Workflows
 
 These are templates you copy into your projects' `.github/workflows/` directories.
+
+**Generic CI templates** (harvested from dot-cursor; no Droid runtime needed — plain GitHub Actions):
+
+| Workflow | What it does |
+|---|---|
+| `branch-hygiene.yml` | Weekly: flag stale/drifted/merged branches; opens a cleanup issue |
+| `commit-lint.yml` | Per-PR: fail if any commit isn't Conventional Commits format |
+| `pr-description.yml` | Auto-generate a structured PR description from conventional commits |
+| `pr-review-checklist.yml` | Per-PR: flag large diffs, secret/config changes, missing tests, AI-instruction changes, dep-without-lockfile (references the `arch-review` droid for deep review) |
+| `session-maintenance.yml` | Daily: archive stale session logs, nudge on missing handoffs, weekly summary (references the `handoff`/`mine-sessions` droids) |
 
 #### PR Review Automation
 
