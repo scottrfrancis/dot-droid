@@ -325,6 +325,16 @@ droid> feat(api): add tenant isolation check on /reports endpoint
 
 These are templates you copy into your projects' `.github/workflows/` directories.
 
+**Generic CI templates** (harvested from dot-cursor; no Droid runtime needed — plain GitHub Actions):
+
+| Workflow | What it does |
+|---|---|
+| `branch-hygiene.yml` | Weekly: flag stale/drifted/merged branches; opens a cleanup issue |
+| `commit-lint.yml` | Per-PR: fail if any commit isn't Conventional Commits format |
+| `pr-description.yml` | Auto-generate a structured PR description from conventional commits |
+| `pr-review-checklist.yml` | Per-PR: flag large diffs, secret/config changes, missing tests, AI-instruction changes, dep-without-lockfile (references the `arch-review` droid for deep review) |
+| `session-maintenance.yml` | Daily: archive stale session logs, nudge on missing handoffs, weekly summary (references the `handoff`/`mine-sessions` droids) |
+
 #### PR Review Automation
 
 Every pull request gets an automated Droid review based on your `.droid.yaml` rules.
